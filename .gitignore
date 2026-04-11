@@ -1,0 +1,76 @@
+# =====================
+# Python
+# =====================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# =====================
+# Environnement virtuel
+# =====================
+venv/
+env/
+.venv/
+ENV/
+
+# =====================
+# Django
+# =====================
+*.log
+db.sqlite3
+media/
+staticfiles/
+local_settings.py
+
+# migrations (optionnel, rarement ignoré en prod mais utile en template)
+# apps/**/migrations/*
+# !apps/**/migrations/__init__.py
+
+# =====================
+# Secrets / env
+# =====================
+.env
+.env.*
+!.env.example
+
+# =====================
+# IDE / éditeurs
+# =====================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =====================
+# OS
+# =====================
+.DS_Store
+Thumbs.db
+
+# =====================
+# testing
+# =====================
+coverage.xml
+htmlcov/
+
+# =====================
+# Docker
+# =====================
+docker-compose.override.yml
+
+# =====================
+# Node (si frontend futur)
+# =====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
