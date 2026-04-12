@@ -83,17 +83,20 @@ $C = \mathrm{AEAD}(K^{AB}_{CHAT}, M, N, AAD)$
 
 ## Transfert du message au serveur
 
-```json
-{
-  "chat_id": "...",
-  "sender_id": "...",
-  "ciphertext": "C",
-  "nonce": "N",
-  "aad": "AAD"
-}
+$$
+\mathrm{MSG} =
+\left\{
+\begin{aligned}
+& \text{chat\_id} \\
+& \text{sender\_id} \\
+& \text{ciphertext} = C \\
+& \text{nonce} = N \\
+& \text{aad} = \mathrm{AAD}
+\end{aligned}
+\right.
+$$
 
---- 
-
+---
 
 # Architecture globale
 
