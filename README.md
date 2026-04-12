@@ -1,6 +1,6 @@
 # VaultChat
 
-**VaultChat** est une application web de messagerie sécurisée en cours de développement, conçue selon une architecture **chiffrée de bout en bout (E2EE)** et **zero-knowledge côté serveur (aucun accès au contenu des messages)**, assurant une **forward secrecy** limitée aux sessions de login.
+**VaultChat** est une application web de messagerie sécurisée en cours de développement, conçue selon une architecture **chiffrée de bout en bout (E2EE)**, **zero-knowledge côté serveur (aucun accès au contenu des messages)**, et assurant une **forward secrecy** limitée aux sessions de login.
 
 ---
 
