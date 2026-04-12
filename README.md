@@ -65,7 +65,7 @@ $S_{SHARED} \in {0,1}^{256}$
 
 ## Dérivation de la clef de discussion
 
-$K^{AB}_{CHAT} = \mathrm{HKDF}(S_{SHARED}, salt = 0, info = \text{chat\_AEAD})$
+$K^{AB}_{CHAT} = \mathrm{HKDF}(S_{SHARED}, \; salt = 0, \; \text{info} = \text{"chat\_AEAD"})$
 
 Note : le salt est optionnel car l'entrée est déjà à haute entropie.
 
