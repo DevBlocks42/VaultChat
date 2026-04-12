@@ -90,7 +90,9 @@ $C = \mathrm{AEAD}(K^{AB}_{CHAT}, M, N, AAD)$
   "ciphertext": "C",
   "nonce": "N",
   "aad": "AAD"
-}```
+}
+
+--- 
 
 
 # Architecture globale
