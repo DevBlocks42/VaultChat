@@ -31,80 +31,66 @@ Note : Une session correspond à une période d’authentification active (login
 
 # Principes théoriques
 
-## Définitions : 
+## Définitions
 
-On donne : 
+$(U_A, U_B) \in \mathrm{User} \times \mathrm{User}$
 
-$$
-    (U_B, U_B) \in \mathrm{User}\times\mathrm{User} \\
-    SK_A, SK_B  : \mathrm{X25519 Private} \\
-    PK_A, PK_B : \mathrm{X25519 Public} \\
-    Chat_\text{AB} : \text{Discussion entre } U_A \text{ et } U_B
+$SK_A, SK_B \in \mathrm{X25519\ Private}$
 
-$$
+$PK_A, PK_B \in \mathrm{X25519\ Public}$
+
+$Chat_{AB}$ : discussion entre $U_A$ et $U_B$
 
 ---
 
 ## Établissement d'un secret ECDH
 
-Pour $U_A$ on a : 
-$$
+Pour $U_A$ :
 
-    S_\text{AB} = \mathrm{ECDH(}SK_A, PK_B\mathrm{)} 
+$S_{AB} = \mathrm{ECDH}(SK_A, PK_B)$
 
-$$
+Pour $U_B$ :
 
-Pour $U_B$ on a : 
-
-$$
-
-    S_\text{BA} = \mathrm{ECDH(}SK_B, PK_A\mathrm{)} 
-
-$$
+$S_{BA} = \mathrm{ECDH}(SK_B, PK_A)$
 
 ---
 
-### Propriété
+## Propriété
 
-$$
-    S_\text{AB} = S_\text{BA} = S_\text{SHARED}
-$$
+$S_{AB} = S_{BA} = S_{SHARED}$
 
-Donc 
-
-$$
-    S_\text{SHARED} \in \{0,1\}^{256} \textbf{(sortie binaire sur 256bits)}
-$$
+$S_{SHARED} \in \{0,1\}^{256}$
 
 ---
 
 ## Dérivation de la clef de discussion
 
-$$
-    \text{\huge K}^{AB}$_\text{CHAT}$ = \text{\huge HKDF(} S_\text{SHARED}, salt = 0, info = \text{"chat\_AEAD"} \text{\huge )}
-$$
+$K^{AB}_{CHAT} = \mathrm{HKDF}(S_{SHARED}, salt = 0, info = \text{chat\_AEAD})$
 
-Note : le salt n'est pas nécéssaire car l'input est déjà de haute entropie.
+Note : le salt est optionnel car l'entrée est déjà à haute entropie.
 
 ---
 
 ## Chiffrement d'un message
 
-Soit :
+- $M$ : message en clair  
+- $N$ : nonce unique  
+- $AAD$ : données authentifiées associées  
 
-- $M : \text{message en clair}$
-- $N : \text{nonce de chiffrement unique}$
-- $AAD : \text{données authentifiées associées}$
+$C = \mathrm{AEAD}(K^{AB}_{CHAT}, M, N, AAD)$
 
-Alors : 
-
-$$
-    C = \text{\huge AEAD(}\text{K}^{AB}_\text{CHAT}, M, N, AAD\text{\huge )}
-$$
+---
 
 ## Transfert du message au serveur
 
-$$\textbf{\Huge MSG}\begin{cases}\text{chat\_id} \\\text{sender\_id} \\\text{ciphertext} = C \\\text{nonce} = N \\\text{aad} = AAD\end{cases}$$
+```json
+{
+  "chat_id": "...",
+  "sender_id": "...",
+  "ciphertext": "C",
+  "nonce": "N",
+  "aad": "AAD"
+}
 
 
 # Architecture globale
