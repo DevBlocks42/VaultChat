@@ -59,7 +59,7 @@ $S_{BA} = \mathrm{ECDH}(SK_B, PK_A)$
 
 $S_{AB} = S_{BA} = S_{SHARED}$
 
-$S_{SHARED} \in {0,1}^{256}$
+$S_{SHARED} \in \left\{0,1\right\}^{256}$
 
 ---
 
