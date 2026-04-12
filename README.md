@@ -81,7 +81,7 @@ $$
 ## Dérivation de la clef de discussion
 
 $$
-    \text{\huge K}^{AB}_\text{CHAT} = \text{\huge HKDF(} S_\text{SHARED}, salt = 0, info = \text{"chat\_AEAD"} \text{\huge )}
+    \text{\huge K}^{AB}$_\text{CHAT}$ = \text{\huge HKDF(} S_\text{SHARED}, salt = 0, info = \text{"chat\_AEAD"} \text{\huge )}
 $$
 
 Note : le salt n'est pas nécéssaire car l'input est déjà de haute entropie.
