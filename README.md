@@ -83,17 +83,13 @@ $C = \mathrm{AEAD}(K^{AB}_{CHAT}, M, N, AAD)$
 
 ## Transfert du message au serveur
 
-$$
-\mathrm{MSG}
-=
-\{
-\text{chat id},
-\text{sender id},
-\text{ciphertext} = C,
-\text{nonce} = N,
-\text{aad} = AAD
-\}
-$$
+MSG = {
+chat id,
+sender id,
+ciphertext C,
+nonce N,
+aad AAD
+}
 
 ---
 
