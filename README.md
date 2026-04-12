@@ -85,15 +85,13 @@ $C = \mathrm{AEAD}(K^{AB}_{CHAT}, M, N, AAD)$
 
 $$
 \mathrm{MSG} =
-\left\{
-\begin{aligned}
-& \text{chat\_id} \\
-& \text{sender\_id} \\
-& \text{ciphertext} = C \\
-& \text{nonce} = N \\
-& \text{aad} = \mathrm{AAD}
-\end{aligned}
-\right.
+\begin{cases}
+\text{chat\_id} \\
+\text{sender\_id} \\
+\text{ciphertext} = C \\
+\text{nonce} = N \\
+\text{aad} = \mathrm{AAD}
+\end{cases}
 $$
 
 ---
