@@ -30,32 +30,81 @@ Note : Une session correspond à une période d’authentification active (login
 ---
 
 # Principes théoriques
-## Définitions
-On donne :
-$$\begin{aligned}&(U_A, U_B)\in \mathrm{User}\times\mathrm{User}\\&SK_A, SK_B:\ \mathrm{X25519\ Private}\\&PK_A, PK_B:\ \mathrm{X25519\ Public}\\&Chat_{\mathrm{AB}}:\ \text{Discussion entre }U_A\text{ et }U_B\end{aligned}$$
+
+## Définitions : 
+
+On donne : 
+
+$$
+    (U_B, U_B) \in \mathrm{User}\times\mathrm{User} \\
+    SK_A, SK_B  : \mathrm{X25519 Private} \\
+    PK_A, PK_B : \mathrm{X25519 Public} \\
+    Chat_\text{AB} : \text{Discussion entre } U_A \text{ et } U_B
+
+$$
+
 ---
+
 ## Établissement d'un secret ECDH
-Pour $U_A$ on a :
-$$S_{AB}=\mathrm{ECDH}(SK_A,PK_B)$$
-Pour $U_B$ on a :
-$$S_{BA}=\mathrm{ECDH}(SK_B,PK_A)$$
+
+Pour $U_A$ on a : 
+$$
+
+    S_\text{AB} = \mathrm{ECDH(}SK_A, PK_B\mathrm{)} 
+
+$$
+
+Pour $U_B$ on a : 
+
+$$
+
+    S_\text{BA} = \mathrm{ECDH(}SK_B, PK_A\mathrm{)} 
+
+$$
+
 ---
+
 ### Propriété
-$$S_{AB}=S_{BA}=S_{\mathrm{SHARED}}$$
-Donc
-$$S_{\mathrm{SHARED}}\in\{0,1\}^{256}\quad\text{(sortie binaire sur 256 bits)}$$
+
+$$
+    S_\text{AB} = S_\text{BA} = S_\text{SHARED}
+$$
+
+Donc 
+
+$$
+    S_\text{SHARED} \in \{0,1\}^{256} \textbf{(sortie binaire sur 256bits)}
+$$
+
 ---
-## Dérivation de la clé de discussion
-$$K^{AB}_{\mathrm{CHAT}}=\mathrm{HKDF}\bigl(S_{\mathrm{SHARED}},\; \text{salt}=0,\; \text{info}=\text{"chat\_AEAD"}\bigr)$$
-Note : le salt n'est pas nécessaire car l'input est déjà de haute entropie.
+
+## Dérivation de la clef de discussion
+
+$$
+    \text{\huge K}^{AB}_\text{CHAT} = \text{\huge HKDF(} S_\text{SHARED}, salt = 0, info = \text{"chat\_AEAD"} \text{\huge )}
+$$
+
+Note : le salt n'est pas nécéssaire car l'input est déjà de haute entropie.
+
 ---
+
 ## Chiffrement d'un message
+
 Soit :
-- $M$ : message en clair  - $N$ : nonce de chiffrement unique  - $AAD$ : données authentifiées associées
-Alors :
-$$C=\mathrm{AEAD}\bigl(K^{AB}_{\mathrm{CHAT}},\;M,\;N,\;AAD\bigr)$$
+
+- $M : \text{message en clair}$
+- $N : \text{nonce de chiffrement unique}$
+- $AAD : \text{données authentifiées associées}$
+
+Alors : 
+
+$$
+    C = \text{\huge AEAD(}\text{K}^{AB}_\text{CHAT}, M, N, AAD\text{\huge )}
+$$
+
 ## Transfert du message au serveur
-```textMSG = {  chat\_id,  sender\_id,  ciphertext: C,  nonce: N,  aad: AAD}``
+
+$$\textbf{\Huge MSG}\begin{cases}\text{chat\_id} \\\text{sender\_id} \\\text{ciphertext} = C \\\text{nonce} = N \\\text{aad} = AAD\end{cases}$$
 
 
 # Architecture globale
