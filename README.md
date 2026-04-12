@@ -59,7 +59,7 @@ $S_{BA} = \mathrm{ECDH}(SK_B, PK_A)$
 
 $S_{AB} = S_{BA} = S_{SHARED}$
 
-$S_{SHARED} \in \{0,1\}^{256}$
+$S_{SHARED} \in {0,1}^{256}$
 
 ---
 
@@ -90,7 +90,7 @@ $C = \mathrm{AEAD}(K^{AB}_{CHAT}, M, N, AAD)$
   "ciphertext": "C",
   "nonce": "N",
   "aad": "AAD"
-}
+}```
 
 
 # Architecture globale
