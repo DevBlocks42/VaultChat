@@ -8,7 +8,7 @@ class IdentityService():
 
         Arguments:
             user -- utilisateur associé
-            signing_public_key -- clef de signature Ed25519
+            signing_public_key -- clef de signature EDCSA
 
         Returns:
             l'objet Identity fraîchement créé

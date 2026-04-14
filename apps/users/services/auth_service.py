@@ -12,7 +12,7 @@ class AuthService:
             email -- adresse email
             username -- nom d'utilisateur
             password -- mot de passe
-            signing_public_key -- clef publique de signature ed25519
+            signing_public_key -- clef publique de signature EDCSA
 
         Returns:
             l'objet User nouvellement créé

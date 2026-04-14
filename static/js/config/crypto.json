@@ -1,0 +1,23 @@
+{
+    "asymmetric": {
+        "algorithm": "ECDSA",
+        "curve": "P-256",
+        "hash": "SHA-256"
+    },
+
+    "symmetric": {
+        "algorithm": "AES-GCM",
+        "key_length": 256,
+        "iv_length": 12
+    },
+    "kdf": {
+        "algorithm": "PBKDF2",
+        "hash": "SHA-256",
+        "iterations": 310000,
+        "salt_length": 16
+    },
+    "storage": {
+        "db_name": "vaultchat_crypto",
+        "store_name": "keys"
+    }
+}
