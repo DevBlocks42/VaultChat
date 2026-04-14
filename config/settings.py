@@ -115,12 +115,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+LANGUAGE_CODE = "fr"
 USE_I18N = True
-
+TIME_ZONE = 'UTC'
 USE_TZ = True
 
 
@@ -135,6 +132,11 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+
+# LOCAL PATHS
+
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
 # REST Auth Config
 
 REST_FRAMEWORK = {
@@ -143,3 +145,8 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ]
 }
+
+## Users app config
+
+MAX_USERNAME_LENGTH=32
+MAX_EMAIL_LENGTH=50
