@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const config = await loadConfig();
 
         const usernameVal = document.getElementById('id_username').value;
-        const passwordVal = document.getElementById('id_password1').value;
+        const passphraseVal = document.getElementById('id_passphrase').value;
 
         // Génération clef de signature ECDSA 
         const ecdsaKeyPair = await generateECDSAKeyPair(config);
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         public_key_field.value = exportedPublicKey;
 
         // Chiffrement clef privée ECDSA
-        const encryptedECDSAPrivateKey = await encryptECDSAPrivateKey(exportedPrivateKey, passwordVal, config);
+        const encryptedECDSAPrivateKey = await encryptECDSAPrivateKey(exportedPrivateKey, passphraseVal, config);
         
         // Stockage IndexedDB clef privée ECDSA 
         downloadEncryptedKeyFile(usernameVal, encryptedECDSAPrivateKey); 
