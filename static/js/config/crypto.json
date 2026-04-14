@@ -19,5 +19,10 @@
     "storage": {
         "db_name": "vaultchat_crypto",
         "store_name": "keys"
+    },
+    "passphrase": {
+        "min_length": 8,
+        "max_length": 128
     }
+
 }

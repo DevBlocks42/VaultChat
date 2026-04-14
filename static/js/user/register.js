@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const config = await loadConfig();
 
         const usernameVal = document.getElementById('id_username').value;
+        const passwordVal = document.getElementById('id_password1').value;
         const passphraseVal = document.getElementById('id_passphrase').value;
 
         // Génération clef de signature ECDSA 
@@ -25,8 +26,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         downloadEncryptedKeyFile(usernameVal, encryptedECDSAPrivateKey); 
         const storage = await saveBrowserPrivateKey(config, usernameVal, encryptedECDSAPrivateKey); 
         
-        form.submit();
-        
+        if(passphraseVal.length >= config.passphrase.min_length && passphraseVal.length <= config.passphrase.max_length) {
+            if(passphraseVal != passwordVal) {
+                form.submit();
+            } else {
+                alert("Erreur, le mot de passe cryptographique doit être différent du mot de passe utilisateur.");
+            }
+        }
 
     });
 });
