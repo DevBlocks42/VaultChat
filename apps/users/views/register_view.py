@@ -1,7 +1,11 @@
 from django.shortcuts import render
 from ..services import UserService
+from ..forms import RegisterForm
 
 user_service = UserService()
 
 def view(request):
-    return render(request, "users/register.html")
+    register_form = RegisterForm()
+    return render(request, "users/register.html", {
+        'form': register_form
+    })
