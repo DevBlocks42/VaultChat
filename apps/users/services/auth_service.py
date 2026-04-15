@@ -1,5 +1,7 @@
+import secrets
 from . import IdentityService, UserService
 from django.db import transaction
+from django.conf import settings
 
 class AuthService:
 
@@ -22,3 +24,8 @@ class AuthService:
             IdentityService.create_identity(user=user, signing_public_key=signing_public_key)
             return user
         return None
+
+    @staticmethod 
+    def generate_challenge(username : str):
+        nonce = secrets.token_urlsafe(settings.CHALLENGE_NONCE_LENGTH)
+        return nonce

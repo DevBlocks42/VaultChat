@@ -1,13 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-
-from apps.users.services import AuthService
+from apps.users.services import AuthService, UserService
 from apps.users.api.serializers import UserRegisterSerializer
 
 
-class UserAuthAPI(APIView):
+class UserRegisterAPI(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -22,3 +22,21 @@ class UserAuthAPI(APIView):
             if user is not None:
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserChallengeAPI(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username')
+        user = UserService.read_user(username)
+        if not username or not user:
+            return JsonResponse({'erreur': 'requête invalide.'}, status=status.HTTP_400_BAD_REQUEST)
+        nonce = AuthService.generate_challenge(user.username)
+        request.session["auth_challenge"] = {
+            "username": user.username,
+            "nonce": nonce
+        }
+        return JsonResponse({'nonce': nonce}, status=status.HTTP_200_OK)
+        
+
+        
