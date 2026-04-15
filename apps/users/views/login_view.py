@@ -1,7 +1,9 @@
 from django.shortcuts import render
-from ..services import UserService
-
-user_service = UserService()
+from ..services import AuthService
+from ..forms import LoginForm
 
 def view(request):
-    return render(request, "users/login.html")
+    form = LoginForm()
+    return render(request, "users/login.html", {
+        'form': form
+    })
