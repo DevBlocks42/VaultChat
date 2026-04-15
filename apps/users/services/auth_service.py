@@ -26,6 +26,14 @@ class AuthService:
         return None
 
     @staticmethod 
-    def generate_challenge(username : str):
+    def generate_challenge():
+        """generate_challenge génère un nonce cryptographique 
+
+        Arguments:
+            username -- nom de l'utilisateur pour qui on génère le nonce
+
+        Returns:
+            le nonce fraîchement généré
+        """
         nonce = secrets.token_urlsafe(settings.CHALLENGE_NONCE_LENGTH)
         return nonce
