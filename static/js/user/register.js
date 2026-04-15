@@ -22,16 +22,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Chiffrement clef privée ECDSA
         const encryptedECDSAPrivateKey = await encryptECDSAPrivateKey(exportedPrivateKey, passphraseVal, config);
         
-        // Stockage IndexedDB clef privée ECDSA 
-        downloadEncryptedKeyFile(usernameVal, encryptedECDSAPrivateKey); 
-        const storage = await saveBrowserPrivateKey(config, usernameVal, encryptedECDSAPrivateKey); 
-        
         if(passphraseVal.length >= config.passphrase.min_length && passphraseVal.length <= config.passphrase.max_length) {
             if(passphraseVal != passwordVal) {
+                // Stockage IndexedDB clef privée ECDSA 
+                downloadEncryptedKeyFile(usernameVal, encryptedECDSAPrivateKey); 
+                const storage = await saveBrowserPrivateKey(config, usernameVal, encryptedECDSAPrivateKey); 
                 form.submit();
             } else {
                 alert("Erreur, le mot de passe cryptographique doit être différent du mot de passe utilisateur.");
             }
+        } else {
+            alert("Erreur, la taille du mot de passe cryptographique doit être comprise entre " + config.passphrase.min_length + " et " + config.passphrase.max_length);
         }
 
     });

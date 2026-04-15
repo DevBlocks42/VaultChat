@@ -1,7 +1,9 @@
 from django.urls import path
-
-from .views import UserAPI
+from rest_framework_simplejwt.views import (TokenObtainPairView, TokenRefreshView)
+from .views import UserAuthAPI
 
 urlpatterns = [
-    path('user', UserAPI.as_view())
+    path('register', UserAuthAPI.as_view()),
+    path("auth/login", TokenObtainPairView.as_view()),
+    path("auth/refresh", TokenRefreshView.as_view()),
 ]
