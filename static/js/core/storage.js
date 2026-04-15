@@ -1,0 +1,59 @@
+function openDB(config) {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(config.storage.db_name, 1);
+        request.onupgradeneeded = () => {
+            const db = request.result;
+            if (!db.objectStoreNames.contains(config.storage.store_name)) {
+                db.createObjectStore(config.storage.store_name, { keyPath: "username" });
+            }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+export async function saveBrowserPrivateKey(config, username, encryptedKey) {
+    const db = await openDB(config);
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(config.storage.store_name, "readwrite");
+      const store = tx.objectStore(config.storage.store_name);
+      const request = store.put({
+        username,
+        ...encryptedKey
+      });
+      request.onsuccess = () => resolve(true);
+      request.onerror = () => reject(request.error);
+    });
+}
+
+export async function getBrowserPrivateKey(config, username) {
+    const db = await openDB(config);
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(config.storage.store_name, "readonly");
+      const store = tx.objectStore(config.storage.store_name);
+      const request = store.get(username);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+}
+
+export function downloadEncryptedKeyFile(username, encryptedKey) {
+    const payload = {
+        username,
+        ...encryptedKey,
+        version: 1,
+        exported_at: new Date().toISOString()
+    };
+    const blob = new Blob(
+        [JSON.stringify(payload, null, 2)],
+        { type: "application/json" }
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${username}-encrypted-key.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}

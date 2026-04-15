@@ -1,0 +1,14 @@
+ul.errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0.25rem 0 0 0;
+}
+
+ul.errorlist li {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+    padding: .4rem .6rem;
+    border-radius: .375rem;
+    font-size: 0.875rem;
+}

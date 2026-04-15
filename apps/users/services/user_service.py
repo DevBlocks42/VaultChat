@@ -1,4 +1,6 @@
-from ..models import User
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class UserService:
 
@@ -28,7 +30,8 @@ class UserService:
         Returns:
             l'objet User fraîchement créé ou None
         """
-        user = User.objects.create_user(username=username, email=email, password=password)
+        user = User(username=username, email=email)
+        user.set_password(password)
         if user is not None:
             user.save()
             return user 
