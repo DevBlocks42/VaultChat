@@ -38,16 +38,16 @@ class UserService:
         return None
 
     @staticmethod
-    def read_user(user_id : int):
+    def read_user(username : str):
         """read_user récupère un utilisateur
 
         Arguments:
-            user_id -- id de l'utilisateur
+            username -- username de l'utilisateur
 
         Returns:
             l'objet User demandé ou None
         """
-        return User.objects.filter(id=user_id).first()
+        return User.objects.filter(username=username).first()
 
     @staticmethod
     def update_user(user_id : int, username : str, email : str, password : str):

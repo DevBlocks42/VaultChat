@@ -1,3 +1,4 @@
+// ================================================ IndexedDB Storage ================================================ //
 function openDB(config) {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(config.storage.db_name, 1);
@@ -37,6 +38,8 @@ export async function getBrowserPrivateKey(config, username) {
     });
 }
 
+// ================================================ FileSystem Storage =============================================== //
+
 export function downloadEncryptedKeyFile(username, encryptedKey) {
     const payload = {
         username,
@@ -56,4 +59,22 @@ export function downloadEncryptedKeyFile(username, encryptedKey) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+}
+
+export async function getFileSystemPrivateKey(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) {
+            return reject(new Error("Aucun fichier fourni"));
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const content = e.target.result;
+            const json = JSON.parse(content);
+            resolve(json);
+        };
+        reader.onerror = () => {
+            reject(reader.error);
+        };
+        reader.readAsText(file);
+    });
 }

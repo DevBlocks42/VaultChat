@@ -21,6 +21,7 @@ daphne==4.2.1
 Django==6.0.3
 django-environ==0.13.0
 djangorestframework==3.17.1
+djangorestframework_simplejwt==5.5.1
 etelemetry==0.3.1
 filelock==3.25.2
 fitz==0.0.1.dev2
@@ -50,6 +51,7 @@ pyasn1==0.6.3
 pyasn1_modules==0.4.2
 pycparser==3.0
 pydot==4.0.1
+PyJWT==2.12.1
 pyOpenSSL==26.0.0
 pyparsing==3.3.2
 python-dateutil==2.9.0.post0

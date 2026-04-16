@@ -1,4 +1,4 @@
-import { arrayBufferToBase64 } from "../core/utils.js"
+import { arrayBufferToBase64, base64ToArrayBuffer } from "../core/utils.js"
 
 export async function generateECDSAKeyPair(config) {
     const keyPair = await crypto.subtle.generateKey(
@@ -35,6 +35,31 @@ export async function encryptECDSAPrivateKey(ecdsaPrivateKey, password, config) 
     }
 }
 
+export async function decryptECDSAPrivateKey(privateKeyMaterials, passphrase, config) {
+    const salt = base64ToArrayBuffer(privateKeyMaterials.salt);
+    const iv = base64ToArrayBuffer(privateKeyMaterials.iv);
+    const ciphertext = base64ToArrayBuffer(privateKeyMaterials.ciphertext);
+    const aesKey = await deriveAESKey(passphrase, salt, config);
+    const pkcs8 = await crypto.subtle.decrypt(
+        {
+            name: config.symmetric.algorithm,
+            iv: iv
+        },
+        aesKey,
+        ciphertext
+    );
+
+    return crypto.subtle.importKey(
+        "pkcs8",
+        pkcs8,
+        {
+            name: config.asymmetric.algorithm,
+            namedCurve: config.asymmetric.curve
+        },
+        true,
+        ["sign"]
+    );
+}
 
 async function deriveAESKey(password, salt, config) {
     const enc = new TextEncoder();
@@ -61,6 +86,20 @@ async function deriveAESKey(password, salt, config) {
         ["encrypt", "decrypt"]
     );
 }
+
+export async function signNonce(pkcs8PrivateKey, nonce, config) {
+    const signature = await crypto.subtle.sign(
+        { name: config.asymmetric.algorithm, hash: config.asymmetric.hash },
+        pkcs8PrivateKey,
+        new TextEncoder().encode(nonce)
+    );
+    const signatureB64 = btoa(
+        String.fromCharCode(...new Uint8Array(signature))
+    );
+    return signatureB64;
+}
+
+
 
 // BASE 64
 export async function exportECDSAPublicKey(rawPublicKey) {
