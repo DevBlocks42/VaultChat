@@ -10,6 +10,7 @@
 
 {% block content %}
 <div class="container mt-5">
+    {% include 'components/messages.html' %}
     {% if form.non_field_errors %}
         <div class="" role="alert">
             {{ form.non_field_errors }}
