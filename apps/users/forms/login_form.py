@@ -8,8 +8,12 @@ class LoginForm(forms.Form):
             'required': "Le nom d'utilisateur est requis.",
         }
     )
-    password1 = forms.CharField(
+    password = forms.CharField(
         label="Mot de passe ",
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        error_messages={
+            'required': "Le mot de passe est requis.",
+        }
     )
+    signature = forms.CharField(widget=forms.HiddenInput(), error_messages={'required': "La signature du nonce est requise."})
     

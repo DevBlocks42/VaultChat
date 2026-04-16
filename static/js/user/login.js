@@ -1,6 +1,7 @@
 import { getBrowserPrivateKey, getFileSystemPrivateKey } from "../core/storage.js";
-import { loadConfig, createInput, hideInput } from "../core/utils.js";
-import { decryptECDSAPrivateKey } from "../core/encryption.js"
+import { loadConfig, createFileInput, hideInput } from "../core/utils.js";
+import { decryptECDSAPrivateKey, signNonce } from "../core/encryption.js"
+import { fetchNonce } from "../core/transport.js";
 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -13,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     toggleAuxAuth.addEventListener('click', async () => {
         if(!auxAuthState) {
             auxAuthState = true;
-            fileInput = createInput(submitField);
+            fileInput = createFileInput(submitField);
         } else {
             hideInput(fileInput);
             auxAuthState = false;
@@ -21,17 +22,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const username = document.getElementById('id_username').value;
         const passphrase = document.getElementById('id_passphrase').value;
+        const signatureField = document.getElementById('id_signature');
+        // fetch nonce
+        const nonce = await fetchNonce(username);
         let privateKeyMaterials;
-        if(auxAuthState) {
-            privateKeyMaterials = await getFileSystemPrivateKey(fileInput.files[0]);
-        } else {
-            privateKeyMaterials = await getBrowserPrivateKey(config, username);
+        try {
+            if(auxAuthState) {
+                privateKeyMaterials = await getFileSystemPrivateKey(fileInput.files[0]);
+            } else {
+                privateKeyMaterials = await getBrowserPrivateKey(config, username);
+            }
+            try {
+                const pkcs8PrivateKey = await decryptECDSAPrivateKey(privateKeyMaterials, passphrase, config);
+                const signatureB64 = await signNonce(pkcs8PrivateKey, nonce, config);
+                signatureField.value = signatureB64;
+                form.submit();
+            } catch(err) {
+                alert("Une erreur s'est produite lors du déchiffrement de votre clé, veuillez vérifier votre passphrase.");
+            }
+        } catch(err) {
+            alert("Une erreur s'est produite lors de l'ouverture du coffre cryptographique. Détails : " + err);
         }
-        const pkcs8PrivateKey = await decryptECDSAPrivateKey(privateKeyMaterials, passphrase, config);
-        console.log(pkcs8PrivateKey);
     });
 
 });

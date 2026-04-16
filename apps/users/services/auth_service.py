@@ -1,7 +1,12 @@
 import secrets
+import base64
 from . import IdentityService, UserService
 from django.db import transaction
 from django.conf import settings
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.exceptions import InvalidSignature 
+from apps.users import utils
 
 class AuthService:
 
@@ -37,3 +42,20 @@ class AuthService:
         """
         nonce = secrets.token_urlsafe(settings.CHALLENGE_NONCE_LENGTH)
         return nonce
+
+    @staticmethod
+    def verify_challenge(nonce, signature, signing_public_key):
+        signature_bytes = base64.b64decode(signature) # Bytes
+        signature_bytes = utils.raw_to_der(signature_bytes)
+        der_public_key = serialization.load_der_public_key(base64.b64decode(signing_public_key)) # clef der encodée
+        try:
+            der_public_key.verify(
+                signature_bytes,
+                nonce.encode('UTF-8'),
+                ec.ECDSA(hashes.SHA256())
+            )
+            return True
+        except (InvalidSignature):
+            return False 
+        return False
+

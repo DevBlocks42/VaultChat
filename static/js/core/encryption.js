@@ -87,6 +87,20 @@ async function deriveAESKey(password, salt, config) {
     );
 }
 
+export async function signNonce(pkcs8PrivateKey, nonce, config) {
+    const signature = await crypto.subtle.sign(
+        { name: config.asymmetric.algorithm, hash: config.asymmetric.hash },
+        pkcs8PrivateKey,
+        new TextEncoder().encode(nonce)
+    );
+    const signatureB64 = btoa(
+        String.fromCharCode(...new Uint8Array(signature))
+    );
+    return signatureB64;
+}
+
+
+
 // BASE 64
 export async function exportECDSAPublicKey(rawPublicKey) {
     const publicKeySpki = await crypto.subtle.exportKey(

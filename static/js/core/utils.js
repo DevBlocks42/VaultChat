@@ -21,7 +21,7 @@ export async function loadConfig() {
     return await res.json();
 }
 
-export function createInput(submitField) { 
+export function createFileInput(submitField) { 
     const input = document.createElement("input");
     input.setAttribute("type", "file");
     input.setAttribute("class", "form-control mb-3");
