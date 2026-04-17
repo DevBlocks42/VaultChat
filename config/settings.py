@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "rest_framework",
     # Apps internes 
-    'apps.users'
+    'apps.users',
+    'apps.chats'
 ]
 
 MIDDLEWARE = [
@@ -159,3 +160,7 @@ AUTH_USER_MODEL = "users.User"
 
 CHALLENGE_NONCE_LENGTH=32
 CHALLENGE_TTL=120
+
+# CHAT CONFIG
+
+MAX_CHAT_NAME_LENGTH=32
