@@ -19,6 +19,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const exportedPrivateKey = await exportECDSAPrivateKey(ecdsaKeyPair.privateKey);
         public_key_field.value = exportedPublicKey;
 
+        // Génération de la clef ECDH
+        /*
+            - Changer le nom des fonctions qui contiennent EDCSA, car le principe est identique, 
+            seul le paramètre de clef privé change.
+            Au lieu de traiter uniquement une clef privée ECDSA au format pkcs8, on traite également les clefs privées
+            ECDH au format pkcs8
+        */
+
         // Chiffrement clef privée ECDSA
         const encryptedECDSAPrivateKey = await encryptECDSAPrivateKey(exportedPrivateKey, passphraseVal, config);
         
@@ -26,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(passphraseVal != passwordVal) {
                 // Stockage IndexedDB clef privée ECDSA 
                 downloadEncryptedKeyFile(usernameVal, encryptedECDSAPrivateKey); 
-                const storage = await saveBrowserPrivateKey(config, usernameVal, encryptedECDSAPrivateKey); 
+                const storage = await saveBrowserPrivateKey(config, usernameVal, encryptedECDSAPrivateKey, "ECDSA"); 
                 form.submit();
             } else {
                 alert("Erreur, le mot de passe cryptographique doit être différent du mot de passe utilisateur.");

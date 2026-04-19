@@ -1,5 +1,7 @@
 import { arrayBufferToBase64, base64ToArrayBuffer } from "../core/utils.js"
 
+
+
 export async function generateECDSAKeyPair(config) {
     const keyPair = await crypto.subtle.generateKey(
         {
@@ -12,6 +14,18 @@ export async function generateECDSAKeyPair(config) {
     return keyPair;
 }
 
+export async function generateECDHKeyPair(config) {
+    const keyPair = await crypto.subtle.generateKey(
+        {
+            name: "ECDH",
+            namedCurve: config.asymmetric.curve
+        },
+        true,
+        ["deriveKey", "deriveBits"]
+    );
+}
+
+//format attendu pour clef pkcs8
 export async function encryptECDSAPrivateKey(ecdsaPrivateKey, password, config) {
     const salt = crypto.getRandomValues(
         new Uint8Array(config.kdf.salt_length)
