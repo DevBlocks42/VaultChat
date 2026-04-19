@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Discussions{% endblock %}
+
+{% block css %} 
+    <link href="{% static 'css/non_form_errors.css'%}" rel="stylesheet">
+    <link href="{% static 'css/form_errors.css'%}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    {% include 'components/messages.html' %}
+    {% if form.non_field_errors %}
+        <div class="" role="alert">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+    <div class="container">
+        <div class="row justify-content-center g-3">
+            <h1 class='h1 mb-5'>Discussions publiques disponibles</h1>
+            {% for chat in public_chats %}
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex mb-3">
+                    <div class="card w-100">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                            <h5 class="card-title">{{ chat.name }}</h5>
+                            <p class="card-text text-muted">
+                                Discussion publique
+                            </p>
+                            <form method="post" action="{% url 'chats-join' %}?id={{ chat.id }}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-dark w-100">
+                                    Rejoindre
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            <h1 class='h1 mb-5'>Mes discussions actives</h1>
+            {% for chat in active_chats %}
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex mb-3">
+                    <div class="card w-100">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                            <h5 class="card-title">{{ chat.name }}</h5>
+                            <p class="card-text text-muted">
+                                Discussion privée
+                            </p>
+                            <form method="post" action="{% url 'chats-chat' %}?id={{ chat.id }}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-dark w-100">
+                                    Voir
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
