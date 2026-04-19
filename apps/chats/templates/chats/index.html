@@ -46,7 +46,7 @@
                             <p class="card-text text-muted">
                                 Discussion privée
                             </p>
-                            <form method="post" action="{% url 'chats-chat' %}?id={{ chat.id }}">
+                            <form method="post" action="">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-dark w-100">
                                     Voir
