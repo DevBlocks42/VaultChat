@@ -39,6 +39,13 @@ class RegisterForm(UserCreationForm):
         },
         validators=[validate_signing_public_key]
     )
+    key_agreement_public_key = forms.CharField(
+        widget=forms.HiddenInput,
+        error_messages={
+            'required': "La clef publique est requise."
+        }
+        #TODO validators
+    )
 
     class Meta:
         model = User

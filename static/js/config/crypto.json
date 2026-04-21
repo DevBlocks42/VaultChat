@@ -1,6 +1,7 @@
 {
     "asymmetric": {
         "algorithm": "ECDSA",
+        "algorithm2": "ECDH",
         "curve": "P-256",
         "hash": "SHA-256"
     },
