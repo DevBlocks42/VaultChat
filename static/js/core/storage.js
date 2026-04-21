@@ -33,6 +33,8 @@ export async function getBrowserPrivateKey(config, username, context) {
     return new Promise((resolve, reject) => {
         const tx = db.transaction(config.storage.store_name, "readonly");
         const store = tx.objectStore(config.storage.store_name);
+        //const index = store.index("context");
+        //const request = index.get([username, context]);
         const request = store.get([username, context]);
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
@@ -41,10 +43,11 @@ export async function getBrowserPrivateKey(config, username, context) {
 
 // ================================================ FileSystem Storage =============================================== //
 
-export function downloadEncryptedKeyFile(username, encryptedKey) {
+export function downloadEncryptedKeyFile(username, encryptedECDSAKey, encryptedECDHKey) {
     const payload = {
         username,
-        ...encryptedKey,
+        ECDSA: encryptedECDSAKey,
+        ECDH: encryptedECDHKey,
         version: 1,
         exported_at: new Date().toISOString()
     };

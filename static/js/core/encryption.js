@@ -23,10 +23,11 @@ export async function generateECDHKeyPair(config) {
         true,
         ["deriveKey", "deriveBits"]
     );
+    return keyPair;
 }
 
 //format attendu pour clef pkcs8
-export async function encryptECDSAPrivateKey(ecdsaPrivateKey, password, config) {
+export async function encryptPrivateKey(pkcs8PrivateKey, password, config) {
     const salt = crypto.getRandomValues(
         new Uint8Array(config.kdf.salt_length)
     );
@@ -40,7 +41,7 @@ export async function encryptECDSAPrivateKey(ecdsaPrivateKey, password, config) 
             iv: iv
         },
         aesKey,
-        ecdsaPrivateKey
+        pkcs8PrivateKey
     );
     return {
         salt: arrayBufferToBase64(salt),
@@ -72,6 +73,32 @@ export async function decryptECDSAPrivateKey(privateKeyMaterials, passphrase, co
         },
         true,
         ["sign"]
+    );
+}
+
+export async function decryptECDHPrivateKey(privateKeyMaterials, passphrase, config) {
+    const salt = base64ToArrayBuffer(privateKeyMaterials.salt);
+    const iv = base64ToArrayBuffer(privateKeyMaterials.iv);
+    const ciphertext = base64ToArrayBuffer(privateKeyMaterials.ciphertext);
+    const aesKey = await deriveAESKey(passphrase, salt, config);
+    const pkcs8 = await crypto.subtle.decrypt(
+        {
+            name: config.symmetric.algorithm,
+            iv: iv
+        },
+        aesKey,
+        ciphertext
+    );
+
+    return crypto.subtle.importKey(
+        "pkcs8",
+        pkcs8,
+        {
+            name: config.asymmetric.algorithm2,
+            namedCurve: config.asymmetric.curve
+        },
+        true,
+        ["deriveKey", "deriveBits"]
     );
 }
 
@@ -116,7 +143,7 @@ export async function signNonce(pkcs8PrivateKey, nonce, config) {
 
 
 // BASE 64
-export async function exportECDSAPublicKey(rawPublicKey) {
+export async function exportPublicKey(rawPublicKey) {
     const publicKeySpki = await crypto.subtle.exportKey(
         "spki",
         rawPublicKey
@@ -125,7 +152,7 @@ export async function exportECDSAPublicKey(rawPublicKey) {
 }
 
 // RAW BYTES
-export async function exportECDSAPrivateKey(rawPrivateKey) {
+export async function exportPrivateKey(rawPrivateKey) {
     const privateKeyPkcs8 = await crypto.subtle.exportKey(
         "pkcs8",
         rawPrivateKey

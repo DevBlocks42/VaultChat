@@ -18,7 +18,8 @@ class UserRegisterAPI(APIView):
             password = serializer.validated_data['password']
             password2 = serializer.validated_data['password2']
             signing_public_key = serializer.validated_data['signing_public_key']
-            user = AuthService.register_user(email, username, password, signing_public_key)
+            key_agreement_public_key = serializer.validated_data['key_agreement_public_key']
+            user = AuthService.register_user(email, username, password, signing_public_key, key_agreement_public_key)
             if user is not None:
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

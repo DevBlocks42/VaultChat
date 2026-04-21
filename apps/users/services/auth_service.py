@@ -12,7 +12,7 @@ class AuthService:
 
     @staticmethod
     @transaction.atomic
-    def register_user(email : str, username : str, password : str, signing_public_key : str):
+    def register_user(email : str, username : str, password : str, signing_public_key : str, key_agreement_public_key : str):
         """register_user enregistre un nouvel utilisateur
 
         Arguments:
@@ -20,13 +20,14 @@ class AuthService:
             username -- nom d'utilisateur
             password -- mot de passe
             signing_public_key -- clef publique de signature EDCSA
+            key_agreement_public_key -- clef publique d'accord de clef ECDH
 
         Returns:
             l'objet User nouvellement créé
         """
         user = UserService.create_user(username=username, email=email, password=password)
         if user is not None:
-            IdentityService.create_identity(user=user, signing_public_key=signing_public_key)
+            IdentityService.create_identity(user=user, signing_public_key=signing_public_key, key_agreement_public_key=key_agreement_public_key)
             return user
         return None
 

@@ -31,8 +31,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             if(auxAuthState) {
                 privateKeyMaterials = await getFileSystemPrivateKey(fileInput.files[0]);
+                privateKeyMaterials = privateKeyMaterials.ECDSA;
+
             } else {
-                privateKeyMaterials = await getBrowserPrivateKey(config, username);
+                privateKeyMaterials = await getBrowserPrivateKey(config, username, "ECDSA");
             }
             try {
                 const pkcs8PrivateKey = await decryptECDSAPrivateKey(privateKeyMaterials, passphrase, config);
