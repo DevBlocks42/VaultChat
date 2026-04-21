@@ -20,12 +20,9 @@ L’objectif de VaultChat est de permettre des échanges de messages privés où
 Le projet repose sur une conception cryptographique moderne :
 
 - Une paire de clef **ECDSA (Elliptic Curve Digital Signature Algorithm )** long-terme pour l’authentification des utilisateurs (signature d’identité)
-- Une paire de clef **X25519 ECDH (Elliptic-curve Diffie–Hellman)** éphémère générée à chaque login pour l'établissement de secrets partagés entre utilisateurs actifs durant une session de login.
-- Chiffrement authentifié **AEAD (Authenticated Encryption with Associated Data)** pour les messages
-- Dérivation de clés via **HKDF (HMAC-based Key Derivation Function)** à partir du secret partagé ECDH.
+- Une paire de clef **X25519 ECDH (Elliptic-curve Diffie–Hellman)** permanente pour l'établissement de secrets partagés entre utilisateurs.
+- ...
 - Stockage des clés privées côté client uniquement (IndexedDB) 
-
-Note : Une session correspond à une période d’authentification active (login) durant laquelle une paire X25519 éphémère est utilisée.
 
 ---
 
