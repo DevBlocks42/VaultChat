@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block css %} 
+    <link href="{% static 'css/non_form_errors.css'%}" rel="stylesheet">
+    <link href="{% static 'css/form_errors.css'%}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    {% include 'components/messages.html' %}
+    {% if form.non_field_errors %}
+        <div class="" role="alert">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+    <div class="d-flex justify-content-center">
+        <div class="card shadow bg-light w-100" style="max-width: 500px;">
+            <div class="card-body">
+                <h3 class="text-center mb-4">Connexion</h3>
+                <button id = 'id_aux_auth' class='btn btn-dark mt-2 mb-4'>Authentification auxilliaire</button>
+                <form id="login_form" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <label for="id_passphrase">
+                        Passphrase de chiffrement (LOCAL UNIQUEMENT)
+                    </label>
+                    <input class='form-control' type="password" id="id_passphrase" autocomplete="off">
+                    <div class="d-grid mt-3">
+                        <button id="login_button" type="submit" class="btn btn-dark">
+                            Connexion
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="module" src="{% static 'js/user/login.js' %}"></script>
+{% endblock %}

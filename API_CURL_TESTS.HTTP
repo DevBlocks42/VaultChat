@@ -1,0 +1,26 @@
+HTTP POST /api/users/register
+
+curl -X POST http://localhost:8000/api/users/register   -H "Content-Type: application/json"   -d '{
+    "username": "mark",
+    "email": "mark@example.com",
+    "password": "StrongPassword123",
+    "password2": "StrongPassword123",
+    "signing_public_key": "BASE64_PUBLIC_KEY"
+  }'
+
+
+{"signing_public_key":["Encodage de clé publique invalide (base64)."]}
+
+===> Résultat attendu : OK 
+
+
+
+
+HTTP POST /api/users/challenge
+
+curl -X POST http://localhost:8000/api/users/challenge   -H "Content-Type: application/json"   -d '{
+    "username": "toor"
+}'
+{"nonce": "nLcmB0JzgXufoi0ATvn3m_B3nnkBNETE0JVBhCN1xng"}
+
+===> Résultat attendu : OK

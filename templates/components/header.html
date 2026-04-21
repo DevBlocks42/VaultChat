@@ -1,0 +1,30 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">&#128274; VaultChat</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav ms-auto">
+                {% if not user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'users-register' %}active{% endif %}" href="{% url 'users-register' %}">Inscription</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'users-login' %}active{% endif %}" href="{% url 'users-login' %}" href="{% url 'users-login' %}">Connexion</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users-dashboard' %}">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'users-logout' %}">
+                            {% csrf_token %}
+                            <button class='nav-link' type="submit">Déconnexion</button>
+                        </form>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

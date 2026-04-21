@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "rest_framework",
     # Apps internes 
-    'apps.users'
+    'apps.users',
+    'apps.chats'
 ]
 
 MIDDLEWARE = [
@@ -61,7 +62,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        "DIRS": [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -115,12 +116,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+LANGUAGE_CODE = "fr"
 USE_I18N = True
-
+TIME_ZONE = 'UTC'
 USE_TZ = True
 
 
@@ -134,3 +132,41 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+
+# LOCAL PATHS
+
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
+# REST Auth Config
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ]
+}
+
+## Users app config
+
+MAX_USERNAME_LENGTH=32
+MAX_EMAIL_LENGTH=50
+
+# USER AUTH
+
+AUTH_USER_MODEL = "users.User"
+
+# SIGNING CHALLNGE CONF
+
+CHALLENGE_NONCE_LENGTH=32
+CHALLENGE_TTL=120
+
+# CHAT CONFIG
+
+MAX_CHAT_NAME_LENGTH=32
+
+# AUTHENTICATION
+
+LOGOUT_REDIRECT_URL="users-login"
+LOGIN_REDIRECT_URL="users-dashboard"
+LOGIN_URL = "users-login"
