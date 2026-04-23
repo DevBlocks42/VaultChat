@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ chat.name }}{% endblock %}
+
+{% block css %} 
+    <link href="{% static 'css/non_form_errors.css'%}" rel="stylesheet">
+    <link href="{% static 'css/form_errors.css'%}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    {% include 'components/messages.html' %}
+    {% if form.non_field_errors %}
+        <div class="" role="alert">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+    <div class="d-flex flex-column">
+
+        <textarea class="form-control"
+                  style="height: 60vh;"
+                  readonly></textarea>
+    
+        <div class="input-group mt-2">
+            <input class="form-control" placeholder="Saisir votre message">
+            <button class="btn btn-dark" type="button">➤</button>
+        </div>
+    
+    </div>
+</div>
+{% endblock %}

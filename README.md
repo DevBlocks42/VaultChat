@@ -46,3 +46,28 @@ Le projet repose sur une conception cryptographique moderne :
 ![Modèle Conceptuel des données de l'application](MCD_VaultChat.jpg)
 
 <small>Conçu avec looping https://www.looping-mcd.fr/</small>
+
+
+# Flux de chiffrement d'un message 
+
+Note : on n'aborde pas encore la signature des messages pour l'instant dans une optique de simplification du problème.
+
+A souhaite discuter avec B dans une discussion D; 
+
+A ouvre la discussion D : 
+
+	A reçoit la clef publique ECDH de B :
+		
+		A écrit un message M déstiné à B : 
+
+			A génère une paire de clefs éphémères ECDH notées ESK_A (clef privée éphémère ECDH de A); EPK_A (clef publique ECDH de A)
+
+			(ESK_A, EPK_A) = generateECDHKeyPair()
+
+			S = ECDH(ESK_A, PK_B) // Calcul du secret partagé
+
+			K = HKDF(S, salt=0, info="VaultChat_Message") // Dérivation de clef
+
+			MSG(M) = AES-ENCRYPT(K, M, nonce) // Chiffrement du message via AES-GCM.   
+
+			ENVOIE DE MSG(M) AU SERVEUR

@@ -62,16 +62,17 @@ class ChatService():
         Returns:
             L'objet Chat demandé ou None
         """
-        return Chat.objects.get(id=id)
+        return Chat.objects.filter(id=id).first()
 
     @staticmethod
     def allowed_to_participate(user : User, chat : Chat):
-        chats = Chat.objects.filter(public=True).exclude(
-            Exists(
-                ChatParticipation.objects.filter(user=user, chat_id=OuterRef("pk"))
-            )
+        return (
+            chat.public
+            or ChatParticipation.objects.filter(
+                user=user,
+                chat=chat
+            ).exists()
         )
-        return chat in chats or None
 
     @staticmethod
     def get_user_chats(user : User):
