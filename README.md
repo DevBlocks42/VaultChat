@@ -50,7 +50,7 @@ Le projet repose sur une conception cryptographique moderne :
 
 # Flux de chiffrement d'un message 
 
-Note : on n'aborde pas encore la signature des messages pour l'instant dans une optique de simplification du problème.
+Note : on n'aborde pas encore la signature des messages pour simplifier le problème.
 
 A souhaite discuter avec B dans une discussion D; 
 
