@@ -1,4 +1,5 @@
 from ..models import *
+from apps.users.models import User
 from django.db import transaction
 from django.db.models import Exists, OuterRef
 
@@ -78,3 +79,18 @@ class ChatService():
     def get_user_chats(user : User):
         chats = Chat.objects.filter(chatparticipation__user=user)
         return chats
+
+    @staticmethod
+    def get_allowed_identities(chat : Chat):
+        allowed_identities = set(
+            chat.participants.values_list("identity_id", flat=True)
+        )
+        return allowed_identities
+
+    def store_chat_message(chat : Chat, sender : User):
+        message = Message.objects.create(sender=sender, chat=chat)
+        return message
+
+    def store_message_cipher(message : Message, ciphertext : str, ephemeral_public_key : str, nonce : str, identity : Identity):
+        message_cipher = MessageCipher.objects.create(ciphertext=ciphertext, ephemeral_public_key=ephemeral_public_key, nonce=nonce, identity=identity, message=message)
+        return message_cipher
