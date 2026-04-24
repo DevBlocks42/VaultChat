@@ -50,7 +50,7 @@ Le projet repose sur une conception cryptographique moderne :
 
 # Flux de chiffrement d'un message 
 
-Note : on n'aborde pas encore la signature des messages pour simplifier le problème.
+Note : on n'aborde pas encore la signature des messages ni la discussion entre n>2 utilisateurs pour simplifier le problème.
 
 A souhaite discuter avec B dans une discussion D; 
 
@@ -66,7 +66,11 @@ A ouvre la discussion D :
 
 			S = ECDH(ESK_A, PK_B) // Calcul du secret partagé
 
-			K = HKDF(S, salt=0, info="VaultChat_Message") // Dérivation de clef
+			salt = hash(EPK_A || PK_B)
+
+			K = HKDF(S, salt, info="VaultChat_Message") // Dérivation de clef
+
+			nonce = secure_random(16) // 16 bytes (128 bits)
 
 			MSG(M) = AES-ENCRYPT(K, M, nonce) // Chiffrement du message via AES-GCM.   
 
