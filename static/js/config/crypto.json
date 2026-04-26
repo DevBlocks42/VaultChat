@@ -13,6 +13,7 @@
     },
     "kdf": {
         "algorithm": "PBKDF2",
+        "algorithm2": "HKDF",
         "hash": "SHA-256",
         "iterations": 310000,
         "salt_length": 16

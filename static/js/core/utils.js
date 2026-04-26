@@ -16,6 +16,22 @@ export function base64ToArrayBuffer(base64) {
     return bytes.buffer;
 }
 
+export function base64ToArrayBufferSafe(base64) {
+    base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
+    base64 = base64.replace(/\s/g, '');
+    const pad = base64.length % 4;
+    if (pad) {
+        base64 += '='.repeat(4 - pad);
+    }
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+
+
 export async function loadConfig() {
     const res = await fetch("/static/js/config/crypto.json");
     return await res.json();

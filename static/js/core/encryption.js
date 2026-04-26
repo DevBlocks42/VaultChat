@@ -1,6 +1,4 @@
-import { arrayBufferToBase64, base64ToArrayBuffer } from "../core/utils.js"
-
-
+import { arrayBufferToBase64, base64ToArrayBuffer, base64ToArrayBufferSafe } from "../core/utils.js"
 
 export async function generateECDSAKeyPair(config) {
     const keyPair = await crypto.subtle.generateKey(
@@ -140,7 +138,74 @@ export async function signNonce(pkcs8PrivateKey, nonce, config) {
     return signatureB64;
 }
 
+export async function computeSharedSecret(issuerEphemeralSecretKey, recipientPublicKey) {
+    const sharedSecret = await crypto.subtle.deriveBits(
+        {
+          name: "ECDH",
+          public: recipientPublicKey
+        },
+        issuerEphemeralSecretKey,
+        256
+    );
+    return sharedSecret;
+}
 
+export async function deriveSharedSecret(secret, config) {
+    const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        secret,
+        config.kdf.algorithm2, // HKDF
+        false,
+        ["deriveKey"]
+    );
+    return keyMaterial;
+}
+
+export async function encryptMessageForRecipient(keyMaterial, plaintext, config) {
+    const aesKey = await crypto.subtle.deriveKey(
+        {
+            name: config.kdf.algorithm2,
+            hash: config.kdf.hash,
+            salt: new Uint8Array([]), // TODO : Calculer un salt conforme au modèle crypto
+            info: new TextEncoder().encode("VaultChat_Message")
+        },
+        keyMaterial,
+        {
+          name: config.symmetric.algorithm,
+          length: config.symmetric.key_length
+        },
+        false,
+        ["encrypt", "decrypt"]
+    );
+    const iv = crypto.getRandomValues(new Uint8Array(config.symmetric.iv_length));
+    const ciphertextBuffer = await crypto.subtle.encrypt(
+        {
+            name: config.symmetric.algorithm,
+            iv: iv
+        },
+        aesKey,
+        new TextEncoder().encode(plaintext)
+    );
+    return {
+        ciphertext: arrayBufferToBase64(ciphertextBuffer),
+        nonce: arrayBufferToBase64(iv) 
+    }
+}
+
+export async function importRecipientPublicKey(base64Spki, config) {
+    const spkiBuffer = base64ToArrayBufferSafe(base64Spki);
+
+    return await crypto.subtle.importKey(
+        "spki",
+        spkiBuffer,
+        {
+            name: config.asymmetric.algorithm2,
+            namedCurve: config.asymmetric.curve
+        },
+        false,
+        []
+    );
+}
 
 // BASE 64
 export async function exportPublicKey(rawPublicKey) {
