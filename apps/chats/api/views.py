@@ -23,7 +23,10 @@ class ChatMessageAPI(APIView):
                     message = ChatService.store_chat_message(chat, user)
                     if not message:
                         raise Exception("Ressource non créée")
+                    chat_identities = ChatService.get_allowed_identities(chat)
                     for cipher in ciphertexts:
+                        if not cipher['identity'].id in chat_identities:
+                            raise PermissionDenied("Forbidden")
                         message_cipher = ChatService.store_message_cipher(
                             message, 
                             cipher['ciphertext'], 
@@ -31,7 +34,8 @@ class ChatMessageAPI(APIView):
                             cipher['nonce'],
                             cipher['identity']
                         )
-            except Exception:
+            except Exception as e:
+                print("ERROR:", e)
                 return Response(
                     {"detail": "Internal Server Error"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR

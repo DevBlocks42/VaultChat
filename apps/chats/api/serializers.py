@@ -15,7 +15,7 @@ class MessageCreateSerializer(serializers.Serializer):
     ciphertexts = MessageCipherSerializer(many=True)
     def validate(self, data):
         chat = data["chat"]
-        allowed_identities = ChatService.get_allowed_identitied(chat)
+        allowed_identities = ChatService.get_allowed_identities(chat)
         for c in data["ciphertexts"]:
             if c["identity"].id not in allowed_identities:
                 raise serializers.ValidationError(
@@ -27,6 +27,7 @@ class ChatIdentitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Identity
         fields = [
+            "id",
             "signing_public_key",
             "key_agreement_public_key"
         ]
