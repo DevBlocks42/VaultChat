@@ -1,4 +1,5 @@
-from ..models import *
+from apps.chats.models import Chat, ChatParticipation, Message, MessageCipher
+from apps.users.models import User, Identity
 from django.db import transaction
 from django.db.models import Exists, OuterRef
 
@@ -62,18 +63,42 @@ class ChatService():
         Returns:
             L'objet Chat demandé ou None
         """
-        return Chat.objects.get(id=id)
+        return Chat.objects.filter(id=id).first()
 
     @staticmethod
     def allowed_to_participate(user : User, chat : Chat):
-        chats = Chat.objects.filter(public=True).exclude(
-            Exists(
-                ChatParticipation.objects.filter(user=user, chat_id=OuterRef("pk"))
-            )
+        return (
+            chat.public
+            or ChatParticipation.objects.filter(
+                user=user,
+                chat=chat
+            ).exists()
         )
-        return chat in chats or None
 
     @staticmethod
     def get_user_chats(user : User):
-        chats = Chat.objects.filter(chatparticipation__user=user)
+        chats = Chat.objects.filter(participants__user=user)
         return chats
+
+    @staticmethod
+    def get_allowed_identities(chat: Chat):
+        return Identity.objects.filter(
+            user__chat_participations__chat=chat
+        ).values_list("id", flat=True)
+
+    @staticmethod
+    def store_chat_message(chat : Chat, sender : User):
+        message = Message.objects.create(sender=sender, chat=chat)
+        return message
+
+    @staticmethod
+    def store_message_cipher(message : Message, ciphertext : str, ephemeral_public_key : str, nonce : str, identity : Identity):
+        message_cipher = MessageCipher.objects.create(ciphertext=ciphertext, ephemeral_public_key=ephemeral_public_key, nonce=nonce, identity=identity, message=message)
+        return message_cipher
+
+    @staticmethod
+    def get_chat_identities(chat : Chat):
+        identities = Identity.objects.filter(
+            user__chat_participations__chat=chat
+        )
+        return identities
