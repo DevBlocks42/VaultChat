@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .serializers import MessageCreateSerializer
+from .serializers import MessageCreateSerializer, ChatIdentitySerializer
 from apps.chats.services import ChatService
 from django.db import transaction
 import time
@@ -48,3 +48,21 @@ class ChatMessageAPI(APIView):
             },
             status=status.HTTP_201_CREATED
         )
+
+class ChatIdentityAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        chat_id = request.data.get("chat_id")
+        chat = ChatService.get_chat_by_id(chat_id)
+        if chat is None:
+            return Response({"detail": "Not Found"}, status=status.HTTP_404_NOT_FOUND)
+        if not ChatService.allowed_to_participate(user, chat):
+            return Response(
+                {"detail": "Forbidden"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        chat_identities = ChatService.get_chat_identities(chat)
+        serializer = ChatIdentitySerializer(chat_identities, many=True)
+        return Response({'identities': serializer.data}, status=status.HTTP_200_OK)

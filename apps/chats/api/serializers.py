@@ -2,11 +2,12 @@ from rest_framework import serializers
 from apps.users.models import Identity
 from apps.chats.models import Message, MessageCipher, Chat
 from apps.chats.services import ChatService
+from django.conf import settings
 
 class MessageCipherSerializer(serializers.Serializer):
     ciphertext = serializers.CharField()
     ephemeral_public_key = serializers.CharField()
-    nonce = serializers.CharField(max_length=settings.MESSAGE_NONCE_LENGTH, null=False, blank=False)
+    nonce = serializers.CharField(max_length=settings.MESSAGE_NONCE_LENGTH)
     identity = serializers.PrimaryKeyRelatedField(queryset=Identity.objects.all()) 
 
 class MessageCreateSerializer(serializers.Serializer):
@@ -21,4 +22,12 @@ class MessageCreateSerializer(serializers.Serializer):
                     "Opération non permise"
                 )
         return data
+
+class ChatIdentitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Identity
+        fields = [
+            "signing_public_key",
+            "key_agreement_public_key"
+        ]
    
