@@ -99,4 +99,30 @@ A ouvre la discussion D :
 
 				ciphertexts <- MSG(n)   
 
-		ENVOIE DE ciphertexts AU SERVEUR```
+		ENVOIE DE ciphertexts AU SERVEUR
+```
+
+
+--- 
+
+# Screens de l'existant 
+
+![Enregistrement de nouveaux comptes](screens/register_0.png)
+
+<small>Enregistrement de compte</small>
+
+![Fichier de restauration](screens/register_restore_file.png)
+
+<small>Aperçu du fichier de restauration crypté</small>
+
+![Connexion](screens/login.png)
+
+<small>Authentification (mot de passe + passphrase crypto)</small>
+
+![Discussions](screens/chats-index.png)
+
+<small>Index des discussions</small>
+
+![Zone de discussion](screens/Chat_zone.png)
+
+<small>Zone de discussion (en cours)</small>
