@@ -22,7 +22,7 @@ Le projet repose sur une conception cryptographique moderne :
 - Une paire de clef **ECDSA (Elliptic Curve Digital Signature Algorithm )** long-terme pour l’authentification des utilisateurs (signature d’identité)
 - Une paire de clef **X25519 ECDH (Elliptic-curve Diffie–Hellman)** permanente pour l'établissement de secrets partagés entre utilisateurs.
 - ...
-- Stockage des clés privées côté client uniquement (IndexedDB) 
+- Stockage des clés privées côté client uniquement (IndexedDB / Fichier de restauration) 
 
 ---
 
@@ -50,28 +50,34 @@ Le projet repose sur une conception cryptographique moderne :
 
 # Flux de chiffrement d'un message 
 
-Note : on n'aborde pas encore la signature des messages ni la discussion entre n>2 utilisateurs pour simplifier le problème.
+Note : on n'aborde pas encore la signature des messages pour simplifier le problème.
 
-A souhaite discuter avec B dans une discussion D; 
+A souhaite discuter avec B, C, D ... Z dans une discussion D; 
 
 A ouvre la discussion D : 
 
-	A reçoit la clef publique ECDH de B :
+	A reçoit la clef publique ECDH de B, C, D, ... Z :
 		
-		A écrit un message M déstiné à B : 
+		A écrit un message M déstiné à B, C, D, .... Z : 
 
 			A génère une paire de clefs éphémères ECDH notées ESK_A (clef privée éphémère ECDH de A); EPK_A (clef publique ECDH de A)
 
 			(ESK_A, EPK_A) = generateECDHKeyPair()
 
-			S = ECDH(ESK_A, PK_B) // Calcul du secret partagé
+			ciphertexts = []
 
-			salt = hash(EPK_A || PK_B)
+			Pour chaque destinataire :
 
-			K = HKDF(S, salt, info="VaultChat_Message") // Dérivation de clef
+				S = ECDH(ESK_A, destinataire.PK) // Calcul du secret partagé
 
-			nonce = secure_random(16) // 16 bytes (128 bits)
+				salt = hash(EPK_A || destinataire.PK) 
 
-			MSG(M) = AES-ENCRYPT(K, M, nonce) // Chiffrement du message via AES-GCM.   
+				K = HKDF(S, salt, info="VaultChat_Message") // Dérivation de clef
 
-			ENVOIE DE MSG(M) AU SERVEUR
+				nonce = secure_random(16) // 16 bytes (128 bits)
+
+				MSG(n) = AES-ENCRYPT(K, M, nonce) // Chiffrement du message via AES-GCM.
+
+				ciphertexts <- MSG(n)   
+
+		ENVOIE DE ciphertexts AU SERVEUR
