@@ -1,4 +1,4 @@
-import { fetchRecipientsIdentities, sendMessageCiphers } from "../core/transport.js";
+import { fetchRecipientsIdentities, sendMessageCiphers, fetchMessageCiphers } from "../core/transport.js";
 import { computeSharedSecret, deriveSharedSecret, encryptMessageForRecipient, importRecipientPublicKey, generateECDHKeyPair, exportPublicKey } from "../core/encryption.js";
 import { loadConfig } from "../core/utils.js";
 
@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const config = await loadConfig();
     const params = new URLSearchParams(window.location.search);
     const chatId = params.get("id");
+    // MESSAGE RETRIEVE
+    const ciphersFromServer = await fetchMessageCiphers(chatId);
+    console.log(ciphersFromServer);
+    //
     const identities = await fetchRecipientsIdentities(chatId);
     const plaintextField = document.getElementById("id_message_field");
     const sendButton = document.getElementById("id_send_button");

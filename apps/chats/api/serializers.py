@@ -8,7 +8,24 @@ class MessageCipherSerializer(serializers.Serializer):
     ciphertext = serializers.CharField()
     ephemeral_public_key = serializers.CharField()
     nonce = serializers.CharField(max_length=settings.MESSAGE_NONCE_LENGTH)
-    identity = serializers.PrimaryKeyRelatedField(queryset=Identity.objects.all()) 
+    identity = serializers.PrimaryKeyRelatedField(queryset=Identity.objects.all())
+
+
+class MessageCipherRetrieveSerializer(serializers.ModelSerializer):
+    message_id = serializers.IntegerField(source="message.id")
+    created_at = serializers.DateTimeField(source="message.created_at")
+    sender_username = serializers.CharField(source="message.sender.username")
+    class Meta:
+        model = MessageCipher
+        fields = [
+            "message_id",
+            "ciphertext",
+            "ephemeral_public_key",
+            "nonce",
+            "created_at",
+            "sender_username",
+        ]   
+
 
 class MessageCreateSerializer(serializers.Serializer):
     chat = serializers.PrimaryKeyRelatedField(queryset=Chat.objects.all())

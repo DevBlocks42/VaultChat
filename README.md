@@ -102,8 +102,41 @@ A ouvre la discussion D :
 		ENVOIE DE ciphertexts AU SERVEUR
 ```
 
+---
 
---- 
+# Flux de déchiffrement d'un message
+
+```
+Pseudo-Algorithme déchiffrement : 
+
+A ouvre la discussion D :
+	
+	A reçoit la clef publique ECDH de B, C, D, ... Z :
+
+	ciphertexts <- get_ciphertexts_for_user(A) // Liste des ciphertexts destinés à l'utilisateur d'identité A
+
+	plaintexts <- []	
+
+	Pour chaque ciphertext dans ciphertexts faire :
+
+		EPK = ciphertext.ephemeral_public_key
+		nonce = ciphertext.nonce
+		S = ECDH(SK_A, EPK) // Calcul du secret ECDH
+
+		// SALT NON IMPLEMENTE
+
+		// Dérivation du secret ECDH
+		// salt=0 pour l'instant (entropie ??)
+		K = HKDF(input=S, salt=0, info="VaultChat_Message")
+
+		// Déchiffrement 
+		plaintext = AES-DECRYPT(K, nonce, ciphertext.ciphertext)
+		
+		plaintexts <- plaintext
+	
+	Affichage de plaintexts dans le document
+```
+
 
 # Screens de l'existant 
 
