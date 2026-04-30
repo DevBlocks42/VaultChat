@@ -83,9 +83,9 @@ A ouvre la discussion D :
 
 			ciphertexts = []
 
-			Pour chaque destinataire :
+			(ESK_A, EPK_A) = generateECDHKeyPair() // On génère une paire de clef ECDH éphémère
 
-				(ESK_A, EPK_A) = generateECDHKeyPair() // On génère une paire de clef ECDH éphémère
+			Pour chaque destinataire :
 
 				S = ECDH(ESK_A, destinataire.PK) // Calcul du secret partagé
 

@@ -126,6 +126,32 @@ async function deriveAESKey(password, salt, config) {
     );
 }
 
+async function deriveAESKeyFromSecret(secret, config) {
+    const baseKey = await crypto.subtle.importKey(
+        "raw",
+        secret,
+        config.kdf.algorithm2,
+        false,
+        ["deriveKey"]
+    );
+
+    return crypto.subtle.deriveKey(
+        {
+            name: "HKDF",
+            salt: new Uint8Array([0]),
+            info: new TextEncoder().encode("VaultChat_Message"),
+            hash: config.kdf.hash
+        },
+        baseKey,
+        {
+            name: config.symmetric.algorithm,
+            length: config.symmetric.key_length
+        },
+        false,
+        ["decrypt"]
+    );
+}
+
 export async function signNonce(pkcs8PrivateKey, nonce, config) {
     const signature = await crypto.subtle.sign(
         { name: config.asymmetric.algorithm, hash: config.asymmetric.hash },
@@ -161,6 +187,19 @@ export async function deriveSharedSecret(secret, config) {
     return keyMaterial;
 }
 
+async function decryptAES(key, iv, ciphertext, config) {
+    const plainBuffer = await crypto.subtle.decrypt(
+        {
+            name: config.symmetric.algorithm,
+            iv
+        },
+        key,
+        ciphertext
+    );
+    return new TextDecoder().decode(plainBuffer);
+}
+
+
 export async function encryptMessageForRecipient(keyMaterial, plaintext, config) {
     const aesKey = await crypto.subtle.deriveKey(
         {
@@ -190,6 +229,25 @@ export async function encryptMessageForRecipient(keyMaterial, plaintext, config)
         ciphertext: arrayBufferToBase64(ciphertextBuffer),
         nonce: arrayBufferToBase64(iv) 
     }
+}
+
+
+export async function decryptCipherForRecipient(config, cipherObjects, recipientSecretKey) {
+    let plaintexts = [];
+    for(const cipherObj of cipherObjects) {
+        const epk = await importRecipientPublicKey(cipherObj.ephemeral_public_key, config);
+        const nonce = base64ToArrayBuffer(cipherObj.nonce);
+        const ciphertext = base64ToArrayBufferSafe(cipherObj.ciphertext);
+        const secret = await computeSharedSecret(recipientSecretKey, epk);
+        const aes = await deriveAESKeyFromSecret(secret, config);
+        const plaintext = await decryptAES(aes, nonce, ciphertext, config);
+        //
+        //
+        console.log(cipherObj.sender_username);
+        plaintexts.push([plaintext, cipherObj.sender_username, cipherObj.created_at]);
+    }
+    return plaintexts;
+
 }
 
 export async function importRecipientPublicKey(base64Spki, config) {

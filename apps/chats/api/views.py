@@ -74,7 +74,7 @@ class ChatRetrieveMessagesAPI(APIView):
                 status=204
             )
         serializer = MessageCipherRetrieveSerializer(ciphertexts, many=True)
-        return Response({'ciphertexts': serializer.data}, status=status.HTTP_200_OK)
+        return Response({'ciphertexts': serializer.data, 'username': user.username}, status=status.HTTP_200_OK)
         
 
 
