@@ -1,16 +1,54 @@
 import { getBrowserPrivateKey, getFileSystemPrivateKey } from "../core/storage.js";
-import { loadConfig, createFileInput, hideInput } from "../core/utils.js";
-import { decryptECDSAPrivateKey, signNonce } from "../core/encryption.js"
-import { fetchNonce } from "../core/transport.js";
+import { loadConfig, createFileInput, hideInput, arrayBufferToBase64 } from "../core/utils.js";
+import { decryptECDSAPrivateKey, decryptECDHPrivateKey, signNonce } from "../core/encryption.js"
+import { fetchNonce } from "../core/transport.js"; 
 
+
+
+async function setPrivateKey(port, key) {
+    return new Promise((resolve) => {
+        const handler = (e) => {
+            if (e.data.type === "ACK") {
+                port.removeEventListener("message", handler);
+                resolve();
+            }
+        };
+
+        port.addEventListener("message", handler);
+
+        port.postMessage({
+            type: "SET_PRIVATE_KEY",
+            payload: key
+        });
+    });
+}
+
+async function setPrivateKeyNonFirefox(key) {
+    const exported = await crypto.subtle.exportKey("pkcs8", key);
+    const base64Key = btoa(
+        String.fromCharCode(...new Uint8Array(exported))
+    );
+    sessionStorage.setItem("vaultchat_key", base64Key);
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
+    var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+    var isBrave = (navigator.brave && await navigator.brave.isBrave() || false);
+    console.log("IS CHROME : " + isChrome);
+    console.log("IS BRAVE : " + isBrave);
     let auxAuthState = false;
     const config = await loadConfig();
     const form = document.getElementById('login_form');
     const toggleAuxAuth = document.getElementById('id_aux_auth');
     const submitField = document.getElementById('login_button');
     let fileInput;
+    //init worker
+    const worker = new SharedWorker("/static/js/core/vault.js", {
+        type: "module"
+    });
+    const port = worker.port;
+    port.start();
+    //
     toggleAuxAuth.addEventListener('click', async () => {
         if(!auxAuthState) {
             auxAuthState = true;
@@ -28,21 +66,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         // fetch nonce
         const nonce = await fetchNonce(username);
         let privateKeyMaterials;
+        let privateKeyMaterialsECDH;
         try {
             if(auxAuthState) {
                 privateKeyMaterials = await getFileSystemPrivateKey(fileInput.files[0]);
+                privateKeyMaterialsECDH = privateKeyMaterials.ECDH; // WARNING peut-être pas implémenté CORRECTEMENT ? 
                 privateKeyMaterials = privateKeyMaterials.ECDSA;
+                
 
             } else {
                 privateKeyMaterials = await getBrowserPrivateKey(config, username, "ECDSA");
+                privateKeyMaterialsECDH = await getBrowserPrivateKey(config, username, "ECDH");
             }
             try {
+                console.log(privateKeyMaterials);
                 const pkcs8PrivateKey = await decryptECDSAPrivateKey(privateKeyMaterials, passphrase, config);
+                const pkcs8ECDHPrivateKey = await decryptECDHPrivateKey(privateKeyMaterialsECDH, passphrase, config);
                 const signatureB64 = await signNonce(pkcs8PrivateKey, nonce, config);
                 signatureField.value = signatureB64;
+                if(isBrave || isChrome) {
+                    await setPrivateKeyNonFirefox(pkcs8ECDHPrivateKey);
+                } else {
+                    await setPrivateKey(port, pkcs8ECDHPrivateKey);
+                }
                 form.submit();
             } catch(err) {
-                alert("Une erreur s'est produite lors du déchiffrement de votre clé, veuillez vérifier votre passphrase.");
+                alert("Une erreur s'est produite lors du déchiffrement de votre clé, veuillez vérifier votre passphrase : " + err);
             }
         } catch(err) {
             alert("Une erreur s'est produite lors de l'ouverture du coffre cryptographique. Détails : " + err);

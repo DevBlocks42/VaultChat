@@ -54,3 +54,7 @@ export function hideInput(input) {
 export function getCSRFToken() {
     return document.querySelector('[name=csrfmiddlewaretoken]').value;
 }
+
+export function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
