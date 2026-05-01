@@ -42,3 +42,15 @@ export async function sendMessageCiphers(payload) {
         'ciphertexts_count': data.ciphertexts_count
     }
 }
+
+export async function fetchMessageCiphers(chatId, afterId=0) {
+    const url = `/api/chats/retrieve?chat_id=${encodeURIComponent(chatId)}&after_id=${encodeURIComponent(afterId)}`
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    const data = await response.json();
+    return data;
+}
