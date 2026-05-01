@@ -70,14 +70,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             if(auxAuthState) {
                 privateKeyMaterials = await getFileSystemPrivateKey(fileInput.files[0]);
-                privateKeyMaterials = privateKeyMaterials.ECDSA;
                 privateKeyMaterialsECDH = privateKeyMaterials.ECDH; // WARNING peut-être pas implémenté CORRECTEMENT ? 
+                privateKeyMaterials = privateKeyMaterials.ECDSA;
+                
 
             } else {
                 privateKeyMaterials = await getBrowserPrivateKey(config, username, "ECDSA");
                 privateKeyMaterialsECDH = await getBrowserPrivateKey(config, username, "ECDH");
             }
             try {
+                console.log(privateKeyMaterials);
                 const pkcs8PrivateKey = await decryptECDSAPrivateKey(privateKeyMaterials, passphrase, config);
                 const pkcs8ECDHPrivateKey = await decryptECDHPrivateKey(privateKeyMaterialsECDH, passphrase, config);
                 const signatureB64 = await signNonce(pkcs8PrivateKey, nonce, config);
@@ -89,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 form.submit();
             } catch(err) {
-                alert("Une erreur s'est produite lors du déchiffrement de votre clé, veuillez vérifier votre passphrase.");
+                alert("Une erreur s'est produite lors du déchiffrement de votre clé, veuillez vérifier votre passphrase : " + err);
             }
         } catch(err) {
             alert("Une erreur s'est produite lors de l'ouverture du coffre cryptographique. Détails : " + err);

@@ -54,16 +54,14 @@ async function pollMessages(config, workerPort, chatId, lastMessageId) {
     return currentLastMessageId;
 }
 
-
-
 document.addEventListener('DOMContentLoaded', async () => {
     const config = await loadConfig();
     const params = new URLSearchParams(window.location.search);
     const chatId = params.get("id");
-    //const identities = await fetchRecipientsIdentities(chatId);
     const plaintextField = document.getElementById("id_message_field");
     const sendButton = document.getElementById("id_send_button");
     const messageOutputArea = document.getElementById("id_message_output");
+    messageOutputArea.value += "\n";
     //vault worker
     const worker = new SharedWorker("/static/js/core/vault.js", {
         type: "module"
@@ -80,27 +78,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     pollLoop(config, port, chatId, messageOutputArea);
-    // MESSAGE RETRIEVE
-    /*const ciphersToDecrypt = await fetchMessageCiphers(chatId);
-    const cipherObjects = ciphersToDecrypt.ciphertexts;
-    let lastMessageId = cipherObjects[cipherObjects.length - 1].message_id;
-    console.log(lastMessageId);*/
-    // Decryption worker
-    /*port.postMessage({
-        type: "DECRYPT",
-        payload: {
-            config,
-            cipherObjects
-        }
-    });*/
-    /*port.addEventListener('message', (event) => {  
-        const { type, result, error } = event.data || {};  
-        if (type === 'DECRYPT_RESULT') {    
-            console.log('Résultat de décryptage :', result);      
-        } else {
-            console.log('Erreur :', error);   
-        }
-    });*/
     sendButton.addEventListener('click', async (e) => {
         const identities = await fetchRecipientsIdentities(chatId);
         const plaintext = plaintextField.value;

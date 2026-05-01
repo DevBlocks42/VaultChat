@@ -4,10 +4,6 @@ let privateKey = null;
 
 const ports = new Set();
 
-//const brands = self.navigator?.userAgentData?.brands ?? [];
-//const isChrome = brands.some(b => ["Google Chrome", "Chromium"].includes(b.brand));
-//var isBrave = (navigator.brave && await navigator.brave.isBrave() || false);
-
 console.log("VAULT WORKER LOADED");
 
 function serializeError(err) {
