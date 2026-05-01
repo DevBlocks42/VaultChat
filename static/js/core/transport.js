@@ -43,8 +43,8 @@ export async function sendMessageCiphers(payload) {
     }
 }
 
-export async function fetchMessageCiphers(chatId) {
-    const url = `/api/chats/retrieve?chat_id=${encodeURIComponent(chatId)}`
+export async function fetchMessageCiphers(chatId, afterId=0) {
+    const url = `/api/chats/retrieve?chat_id=${encodeURIComponent(chatId)}&after_id=${encodeURIComponent(afterId)}`
     const response = await fetch(url, {
         method: "GET",
         headers: {

@@ -4,6 +4,10 @@ let privateKey = null;
 
 const ports = new Set();
 
+//const brands = self.navigator?.userAgentData?.brands ?? [];
+//const isChrome = brands.some(b => ["Google Chrome", "Chromium"].includes(b.brand));
+//var isBrave = (navigator.brave && await navigator.brave.isBrave() || false);
+
 console.log("VAULT WORKER LOADED");
 
 function serializeError(err) {
@@ -32,14 +36,13 @@ onconnect = function (e) {
                 break;
 
             case "DECRYPT":
-                if (!privateKey) {
+                if (!privateKey && !(isChrome || isBrave)) {
                     port.postMessage({ type: "ERROR", error: "NO_KEY" });
                     return;
                 }
                 try {
                     const { config, cipherObjects } = payload;
                     const result = await decryptCipherForRecipient(config, cipherObjects, privateKey);
-                    console.log('Worker: about to post DECRYPT_RESULT', result);
                     port.postMessage({ type: "DECRYPT_RESULT", result:result });
                 } catch (err) {
                     port.postMessage({ type: "ERROR", error: serializeError(err) });

@@ -241,9 +241,6 @@ export async function decryptCipherForRecipient(config, cipherObjects, recipient
         const secret = await computeSharedSecret(recipientSecretKey, epk);
         const aes = await deriveAESKeyFromSecret(secret, config);
         const plaintext = await decryptAES(aes, nonce, ciphertext, config);
-        //
-        //
-        console.log(cipherObj.sender_username);
         plaintexts.push([plaintext, cipherObj.sender_username, cipherObj.created_at]);
     }
     return plaintexts;
@@ -281,4 +278,20 @@ export async function exportPrivateKey(rawPrivateKey) {
         rawPrivateKey
     );
     return privateKeyPkcs8
+}
+
+export async function importPrivateKey(config, base64PrivateKey) {
+    const binary = Uint8Array.from(atob(base64PrivateKey), c => c.charCodeAt(0));
+
+    const key = await crypto.subtle.importKey(
+        "pkcs8",
+        binary.buffer,
+        {
+            name: config.asymmetric.algorithm2,
+            namedCurve: config.asymmetric.curve
+        },
+        true,
+        ["deriveBits"]
+    );
+    return key;
 }

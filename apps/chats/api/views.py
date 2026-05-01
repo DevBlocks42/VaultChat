@@ -59,6 +59,7 @@ class ChatRetrieveMessagesAPI(APIView):
     def get(self, request):
         user = request.user
         chat_id = request.query_params.get("chat_id")
+        after_id = request.query_params.get("after_id", 0)
         chat = ChatService.get_chat_by_id(chat_id)
         if chat is None:
             return Response({"detail": "Not Found"}, status=status.HTTP_404_NOT_FOUND)
@@ -67,7 +68,7 @@ class ChatRetrieveMessagesAPI(APIView):
                 {"detail": "Forbidden"},
                 status=status.HTTP_403_FORBIDDEN
             )
-        ciphertexts = MessageService.get_recipient_message_ciphertexts(chat, user.identity)
+        ciphertexts = MessageService.get_recipient_message_ciphertexts(chat, user.identity, after_id)
         if ciphertexts is None:
             return Response(
                 {},

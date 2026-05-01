@@ -10,7 +10,7 @@ class MessageService():
         return messages
 
     @staticmethod
-    def get_recipient_message_ciphertexts(chat : Chat, identity : Identity):
+    def get_recipient_message_ciphertexts(chat : Chat, identity : Identity, after_id: int):
         """get_recipient_message_ciphertexts Récupère tous les MessageCipher associés à un Chat pour une Identity donnée
 
         Arguments:
@@ -22,6 +22,7 @@ class MessageService():
         """
         ciphertexts = MessageCipher.objects.select_related("message").filter(
             identity=identity,
-            message__chat=chat
+            message__chat=chat,
+            message__id__gt=after_id
         ).order_by("message__created_at")
         return ciphertexts

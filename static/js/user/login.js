@@ -1,10 +1,41 @@
 import { getBrowserPrivateKey, getFileSystemPrivateKey } from "../core/storage.js";
-import { loadConfig, createFileInput, hideInput } from "../core/utils.js";
+import { loadConfig, createFileInput, hideInput, arrayBufferToBase64 } from "../core/utils.js";
 import { decryptECDSAPrivateKey, decryptECDHPrivateKey, signNonce } from "../core/encryption.js"
 import { fetchNonce } from "../core/transport.js"; 
 
 
+
+async function setPrivateKey(port, key) {
+    return new Promise((resolve) => {
+        const handler = (e) => {
+            if (e.data.type === "ACK") {
+                port.removeEventListener("message", handler);
+                resolve();
+            }
+        };
+
+        port.addEventListener("message", handler);
+
+        port.postMessage({
+            type: "SET_PRIVATE_KEY",
+            payload: key
+        });
+    });
+}
+
+async function setPrivateKeyNonFirefox(key) {
+    const exported = await crypto.subtle.exportKey("pkcs8", key);
+    const base64Key = btoa(
+        String.fromCharCode(...new Uint8Array(exported))
+    );
+    sessionStorage.setItem("vaultchat_key", base64Key);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+    var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+    var isBrave = (navigator.brave && await navigator.brave.isBrave() || false);
+    console.log("IS CHROME : " + isChrome);
+    console.log("IS BRAVE : " + isBrave);
     let auxAuthState = false;
     const config = await loadConfig();
     const form = document.getElementById('login_form');
@@ -51,12 +82,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pkcs8ECDHPrivateKey = await decryptECDHPrivateKey(privateKeyMaterialsECDH, passphrase, config);
                 const signatureB64 = await signNonce(pkcs8PrivateKey, nonce, config);
                 signatureField.value = signatureB64;
-                
-                port.postMessage({
-                    type: "SET_PRIVATE_KEY",
-                    payload: pkcs8ECDHPrivateKey
-                });
-                //
+                if(isBrave || isChrome) {
+                    await setPrivateKeyNonFirefox(pkcs8ECDHPrivateKey);
+                } else {
+                    await setPrivateKey(port, pkcs8ECDHPrivateKey);
+                }
                 form.submit();
             } catch(err) {
                 alert("Une erreur s'est produite lors du déchiffrement de votre clé, veuillez vérifier votre passphrase.");
