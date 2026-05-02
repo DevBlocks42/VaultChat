@@ -31,6 +31,12 @@ export function base64ToArrayBufferSafe(base64) {
     return bytes.buffer;
 }
 
+export function concatUint8Arrays(a, b) {
+    const result = new Uint8Array(a.length + b.length);
+    result.set(a, 0);
+    result.set(b, a.length);
+    return result;
+}
 
 export async function loadConfig() {
     const res = await fetch("/static/js/config/crypto.json");
