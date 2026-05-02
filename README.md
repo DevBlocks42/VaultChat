@@ -20,9 +20,10 @@ L’objectif de VaultChat est de permettre des échanges de messages privés où
 Le projet repose sur une conception cryptographique moderne :
 
 - Une paire de clef **ECDSA (Elliptic Curve Digital Signature Algorithm )** long-terme pour l’authentification des utilisateurs (signature d’identité)
-- Une paire de clef **X25519 ECDH (Elliptic-curve Diffie–Hellman)** permanente pour l'établissement de secrets partagés entre utilisateurs.
-- Le serveur n'est qu'un relai de ciphertext, aucune clef privée n'est stockée côté serveur.
-- Stockage des clés privées côté client uniquement (IndexedDB / Fichier de restauration) 
+- Une paire de clef **ECDH (Elliptic-curve Diffie–Hellman)** permanente pour l'établissement de secrets partagés entre utilisateurs.
+- Génération de **clefs éphémères ECDH** pour le chiffrement de chaque message (forward secrecy par message).
+- Le serveur n'est qu'un relai de ciphertext, aucune clef privée n'est stockée.
+- Stockage des clés privées chiffrées côté client uniquement (IndexedDB / Fichier de restauration) 
 
 ---
 
@@ -49,13 +50,14 @@ Le projet repose sur une conception cryptographique moderne :
 - Création de discussion.
 - Participation à une discussion + contrôles d'accès.
 - Envoi de messages chiffrés non signés (AES-GCM).
+- Récéption des messages chiffrés. 
 
 ---
 
 # Fonctionnalités en attente
 
 - Signature des messages chiffrés avant envoi.
-- Déchiffrement des messages + vérification de la signature à la récéption.
+- Mécanisme de signature/vérification de la signature à la récéption des messages chiffrés.
 - Pagination des messages (+ efficace pour les discussions verbeuses).
 - Intégrer l'export des clefs permanentes dans un fichier chiffré, sur demande de l'utilisateur (déjà implémenté à l'inscription).
 
@@ -123,11 +125,10 @@ A ouvre la discussion D :
 		nonce = ciphertext.nonce
 		S = ECDH(SK_A, EPK) // Calcul du secret ECDH
 
-		// SALT NON IMPLEMENTE
+		salt = hash(EPK_A || destinataire.PK) 
 
 		// Dérivation du secret ECDH
-		// salt=0 pour l'instant (entropie ??)
-		K = HKDF(input=S, salt=0, info="VaultChat_Message")
+		K = HKDF(input=S, salt=salt, info="VaultChat_Message")
 
 		// Déchiffrement 
 		plaintext = AES-DECRYPT(K, nonce, ciphertext.ciphertext)

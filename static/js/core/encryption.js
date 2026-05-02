@@ -1,4 +1,4 @@
-import { arrayBufferToBase64, base64ToArrayBuffer, base64ToArrayBufferSafe } from "../core/utils.js"
+import { arrayBufferToBase64, base64ToArrayBuffer, base64ToArrayBufferSafe, concatUint8Arrays } from "../core/utils.js"
 
 export async function generateECDSAKeyPair(config) {
     const keyPair = await crypto.subtle.generateKey(
@@ -126,7 +126,7 @@ async function deriveAESKey(password, salt, config) {
     );
 }
 
-async function deriveAESKeyFromSecret(secret, config) {
+async function deriveAESKeyFromSecret(secret, salt, config) {
     const baseKey = await crypto.subtle.importKey(
         "raw",
         secret,
@@ -138,7 +138,7 @@ async function deriveAESKeyFromSecret(secret, config) {
     return crypto.subtle.deriveKey(
         {
             name: "HKDF",
-            salt: new Uint8Array([0]),
+            salt: salt,
             info: new TextEncoder().encode("VaultChat_Message"),
             hash: config.kdf.hash
         },
@@ -199,13 +199,30 @@ async function decryptAES(key, iv, ciphertext, config) {
     return new TextDecoder().decode(plainBuffer);
 }
 
+async function exportRawPublicKey(key) {
+    return new Uint8Array(await crypto.subtle.exportKey("raw", key));
+}
 
-export async function encryptMessageForRecipient(keyMaterial, plaintext, config) {
+async function sha256(data) {
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    return new Uint8Array(digest);
+}
+
+export async function generateEncryptionSalt(ephemeralPublicKey, recipientPublicKey) {
+    const epkRaw = await exportRawPublicKey(ephemeralPublicKey);
+    const recipientPkRaw = await exportRawPublicKey(recipientPublicKey);
+    const hashMaterial = concatUint8Arrays(epkRaw, recipientPkRaw); 
+    const hash = await sha256(hashMaterial);
+    return hash;
+}
+
+
+export async function encryptMessageForRecipient(keyMaterial, plaintext, salt, config) {
     const aesKey = await crypto.subtle.deriveKey(
         {
             name: config.kdf.algorithm2,
             hash: config.kdf.hash,
-            salt: new Uint8Array([]), // TODO : Calculer un salt conforme au modèle crypto
+            salt: salt,
             info: new TextEncoder().encode("VaultChat_Message")
         },
         keyMaterial,
@@ -239,7 +256,12 @@ export async function decryptCipherForRecipient(config, cipherObjects, recipient
         const nonce = base64ToArrayBuffer(cipherObj.nonce);
         const ciphertext = base64ToArrayBufferSafe(cipherObj.ciphertext);
         const secret = await computeSharedSecret(recipientSecretKey, epk);
-        const aes = await deriveAESKeyFromSecret(secret, config);
+        //salt
+        const recipientPublicKeyB64SPKI = cipherObj.recipient_public_key;
+        const recipientPublicKey = await importRecipientPublicKey(recipientPublicKeyB64SPKI, config);
+        console.log(recipientPublicKeyB64SPKI);
+        const salt = await generateEncryptionSalt(epk, recipientPublicKey);
+        const aes = await deriveAESKeyFromSecret(secret, salt, config);
         const plaintext = await decryptAES(aes, nonce, ciphertext, config);
         plaintexts.push([plaintext, cipherObj.sender_username, cipherObj.created_at]);
     }
@@ -257,7 +279,7 @@ export async function importRecipientPublicKey(base64Spki, config) {
             name: config.asymmetric.algorithm2,
             namedCurve: config.asymmetric.curve
         },
-        false,
+        true,//chgt
         []
     );
 }

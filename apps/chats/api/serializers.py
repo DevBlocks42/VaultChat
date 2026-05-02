@@ -15,6 +15,7 @@ class MessageCipherRetrieveSerializer(serializers.ModelSerializer):
     message_id = serializers.IntegerField(source="message.id")
     created_at = serializers.DateTimeField(source="message.created_at")
     sender_username = serializers.CharField(source="message.sender.username")
+    recipient_public_key = serializers.CharField(source="identity.key_agreement_public_key")
     class Meta:
         model = MessageCipher
         fields = [
@@ -24,6 +25,7 @@ class MessageCipherRetrieveSerializer(serializers.ModelSerializer):
             "nonce",
             "created_at",
             "sender_username",
+            "recipient_public_key"
         ]   
 
 

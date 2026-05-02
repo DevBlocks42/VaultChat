@@ -1,6 +1,6 @@
 import { fetchRecipientsIdentities, sendMessageCiphers, fetchMessageCiphers } from "../core/transport.js";
 import { getBrowserPrivateKey } from "../core/storage.js";
-import { importPrivateKey, computeSharedSecret, deriveSharedSecret, encryptMessageForRecipient, decryptCipherForRecipient, decryptECDHPrivateKey, importRecipientPublicKey, generateECDHKeyPair, exportPublicKey } from "../core/encryption.js";
+import { generateEncryptionSalt, importPrivateKey, computeSharedSecret, deriveSharedSecret, encryptMessageForRecipient, decryptCipherForRecipient, decryptECDHPrivateKey, importRecipientPublicKey, generateECDHKeyPair, exportPublicKey } from "../core/encryption.js";
 import { loadConfig, sleep } from "../core/utils.js";
 
 let pollDelay = 2500; 
@@ -41,6 +41,7 @@ async function pollMessages(config, workerPort, chatId, lastMessageId) {
         currentLastMessageId = cipherObjects[cipherObjects.length - 1].message_id;
         if(lastMessageId != currentLastMessageId) { // Présence de nouveaux messages
             // Decryption worker
+            
             workerPort.postMessage({
                 type: "DECRYPT",
                 payload: {
@@ -61,6 +62,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const plaintextField = document.getElementById("id_message_field");
     const sendButton = document.getElementById("id_send_button");
     const messageOutputArea = document.getElementById("id_message_output");
+    //
+    //const ids = await fetchRecipientsIdentities(chatId);
+    //console.log(ids);
+    //
     messageOutputArea.value += "\n";
     //vault worker
     const worker = new SharedWorker("/static/js/core/vault.js", {
@@ -80,6 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     pollLoop(config, port, chatId, messageOutputArea);
     sendButton.addEventListener('click', async (e) => {
         const identities = await fetchRecipientsIdentities(chatId);
+        //console.log(identities);
         const plaintext = plaintextField.value;
         var payload = {
             chat: Number(chatId),
@@ -90,7 +96,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const recipientPublicKey = await importRecipientPublicKey(identity.key_agreement_public_key, config);
             const sharedSecret = await computeSharedSecret(ephemeralECDHPair.privateKey, recipientPublicKey);
             const keyMaterial = await deriveSharedSecret(sharedSecret, config);
-            const cipherObject = await encryptMessageForRecipient(keyMaterial, plaintext, config);
+            const hash = await generateEncryptionSalt(ephemeralECDHPair.publicKey, recipientPublicKey);
+            const cipherObject = await encryptMessageForRecipient(keyMaterial, plaintext, hash, config);
             const ephemeralPublicKeyExported = await exportPublicKey(ephemeralECDHPair.publicKey);
             const messageCipher = {
                 'ciphertext': cipherObject.ciphertext,
@@ -102,7 +109,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const res = await sendMessageCiphers(payload);
         plaintextField.value = ""; 
-        console.log(res);
 
     });
     
