@@ -50,14 +50,13 @@ Le projet repose sur une conception cryptographique moderne :
 - Création de discussion.
 - Participation à une discussion + contrôles d'accès.
 - Envoi de messages chiffrés non signés (AES-GCM).
-- Récéption des messages chiffrés. 
+- Récéption des messages chiffrés, déchiffrement. 
 
 ---
 
 # Fonctionnalités en attente
 
-- Signature des messages chiffrés avant envoi.
-- Mécanisme de signature/vérification de la signature à la récéption des messages chiffrés.
+- Mécanisme de signature/vérification des messages.
 - Pagination des messages (+ efficace pour les discussions verbeuses).
 - Intégrer l'export des clefs permanentes dans un fichier chiffré, sur demande de l'utilisateur (déjà implémenté à l'inscription).
 
@@ -109,7 +108,7 @@ A ouvre la discussion D :
 # Flux de déchiffrement d'un message
 
 ```
-Pseudo-Algorithme déchiffrement : 
+Pseudo-Algorithme de déchiffrement : 
 
 A ouvre la discussion D :
 	
@@ -125,7 +124,7 @@ A ouvre la discussion D :
 		nonce = ciphertext.nonce
 		S = ECDH(SK_A, EPK) // Calcul du secret ECDH
 
-		salt = hash(EPK_A || destinataire.PK) 
+		salt = hash(EPK || destinataire.PK) 
 
 		// Dérivation du secret ECDH
 		K = HKDF(input=S, salt=salt, info="VaultChat_Message")
