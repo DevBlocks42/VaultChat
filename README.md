@@ -1,6 +1,6 @@
 # VaultChat
 
-**VaultChat** est une application web de messagerie sécurisée en cours de développement, conçue selon une architecture **chiffrée de bout en bout (E2EE)**, **zero-knowledge côté serveur (aucun accès au contenu des messages)**, et assurant une **forward secrecy** par message.
+**VaultChat** est une application web de messagerie cryptée en cours de développement, conçue selon une architecture **chiffrée de bout en bout (End To End Encryption)**, **zero-knowledge côté serveur (aucun accès au contenu en clair des messages)**, et assurant une **forward secrecy** par message via génération de clef éphémères.
 
 ---
 
@@ -51,6 +51,7 @@ Le projet repose sur une conception cryptographique moderne :
 - Participation à une discussion + contrôles d'accès.
 - Envoi de messages chiffrés non signés (AES-GCM).
 - Récéption des messages chiffrés, déchiffrement. 
+- Modification des informations personnelles (pseudonyme, adresse email, mot de passe) en synchronisation avec le fichier de restauration.
 
 ---
 
@@ -140,22 +141,28 @@ A ouvre la discussion D :
 
 # Screens de l'existant 
 
-![Enregistrement de nouveaux comptes](screens/register_0.png)
-
 <small>Enregistrement de compte</small>
 
-![Fichier de restauration](screens/register_restore_file.png)
+![Enregistrement de nouveaux comptes](screens/register_0.png)
+
 
 <small>Aperçu du fichier de restauration crypté</small>
 
-![Connexion](screens/login.png)
+![Fichier de restauration](screens/register_restore_file.png)
+
 
 <small>Authentification (mot de passe + passphrase crypto)</small>
 
-![Discussions](screens/chats-index.png)
+![Connexion](screens/login.png)
+
+<small>Authentification auxiliaire (mot de passe + passphrase crypto + fichier d'authentification/restauration)</small>
+
+![Connexion auxilliaire](screens/aux_auth.png)
 
 <small>Index des discussions</small>
 
-![Zone de discussion](screens/Chat_zone.png)
+![Discussions](screens/chats-index.png)
 
-<small>Zone de discussion (en cours)</small>
+<small>Zone de discussion</small>
+
+![Zone de discussion](screens/Chat_zone.png)
