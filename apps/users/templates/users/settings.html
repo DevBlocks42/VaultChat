@@ -23,7 +23,13 @@
                     {% csrf_token %}
                     {{ form.as_p }}
                     <div class="d-grid mt-3">
-                        <button id="submit_button" type="submit" class="btn btn-dark">
+                        {% if auth_type == 'AUXILIARY_AUTH' %}
+                            <label class='' for="id_passphrase">
+                                Fichier d'authentification * :
+                            </label>
+                            <input required class='form-control mt-2' type="file" id="id_auth_file" autocomplete="off">
+                        {% endif %}
+                        <button id="submit_button" type="submit" class="btn btn-dark mt-3">
                             Valider
                         </button>
                     </div>
@@ -37,6 +43,7 @@
     <script>
         window.NEW_USERNAME = "{{ new_username|default:'' }}";
         window.OLD_USERNAME = "{{ old_username|default:'' }}";
+        window.AUTH_TYPE = "{{ auth_type|default:'' }}";
     </script>
     <script type="module" src="{% static 'js/user/update.js' %}"></script>
 {% endblock %}

@@ -42,11 +42,10 @@ def view(request):
                 return render(request, "users/settings.html", {
                     'form': form,
                     'old_username': old_username,
-                    'new_username': new_username
+                    'new_username': new_username,
+                    'auth_type': request.session.get('auth_type')
                 })
-                #return redirect("users-settings")
-            
-
     return render(request, "users/settings.html", {
-        'form': form
+        'form': form,
+        'auth_type': request.session.get('auth_type')
     })

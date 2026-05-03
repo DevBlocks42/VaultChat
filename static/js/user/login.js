@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const username = document.getElementById('id_username').value;
         const passphrase = document.getElementById('id_passphrase').value;
         const signatureField = document.getElementById('id_signature');
+        const authTypeField = document.getElementById("id_auth_type");
         // fetch nonce
         const nonce = await fetchNonce(username);
         let privateKeyMaterials;
@@ -72,11 +73,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 privateKeyMaterials = await getFileSystemPrivateKey(fileInput.files[0]);
                 privateKeyMaterialsECDH = privateKeyMaterials.ECDH; // WARNING peut-être pas implémenté CORRECTEMENT ? 
                 privateKeyMaterials = privateKeyMaterials.ECDSA;
-                
+                authTypeField.value="AUXILIARY_AUTH";
 
             } else {
                 privateKeyMaterials = await getBrowserPrivateKey(config, username, "ECDSA");
                 privateKeyMaterialsECDH = await getBrowserPrivateKey(config, username, "ECDH");
+                authTypeField.value="LOCAL_AUTH";
             }
             try {
                 console.log(privateKeyMaterials);

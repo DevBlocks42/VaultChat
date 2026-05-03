@@ -33,8 +33,6 @@ export async function getBrowserPrivateKey(config, username, context) {
     return new Promise((resolve, reject) => {
         const tx = db.transaction(config.storage.store_name, "readonly");
         const store = tx.objectStore(config.storage.store_name);
-        //const index = store.index("context");
-        //const request = index.get([username, context]);
         const request = store.get([username, context]);
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
@@ -54,29 +52,20 @@ export async function updateBrowserUsername(config, oldUsername, newUsername) {
 
         request.onsuccess = (event) => {
             const cursor = event.target.result;
-
             if (!cursor) {
                 resolve(true);
                 return;
             }
-
             const value = cursor.value;
-
-            // On cible uniquement les entrées de l'ancien username
             if (value.username === oldUsername) {
 
                 const updatedValue = {
                     ...value,
                     username: newUsername
                 };
-
-                // suppression ancienne entrée
                 cursor.delete();
-
-                // réinsertion avec nouveau username
                 store.put(updatedValue);
             }
-
             cursor.continue();
         };
     });

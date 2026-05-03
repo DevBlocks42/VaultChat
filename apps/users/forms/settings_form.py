@@ -23,7 +23,7 @@ class SettingsForm(forms.ModelForm):
         required=False
     )
     actual_password = forms.CharField(
-        label="Mot de passe actuel",
+        label="Mot de passe actuel *",
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         required=True
     )

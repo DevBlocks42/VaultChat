@@ -17,6 +17,8 @@ def view(request):
             challenge = request.session.get("auth_challenge")
             issued_at = challenge.get('issued_at')
             nonce = challenge.get('nonce')
+            auth_type = form.cleaned_data["auth_type"]
+            print(auth_type)
             user = authenticate(request, username=username, password=password)
             if time.time() - issued_at > settings.CHALLENGE_TTL:
                 messages.error(request, "Le challenge a expiré.")
@@ -29,6 +31,7 @@ def view(request):
             if AuthService.verify_challenge(nonce, signature, signing_public_key):
                 login(request, user)
                 del request.session["auth_challenge"]
+                request.session["auth_type"] = auth_type 
                 messages.success(request, "Authentification réussie.")
                 return redirect('users-dashboard')
             else:
