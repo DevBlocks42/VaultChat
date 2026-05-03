@@ -41,6 +41,47 @@ export async function getBrowserPrivateKey(config, username, context) {
     });
 }
 
+export async function updateBrowserUsername(config, oldUsername, newUsername) {
+    const db = await openDB(config);
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(config.storage.store_name, "readwrite");
+        const store = tx.objectStore(config.storage.store_name);
+
+        const request = store.openCursor();
+
+        request.onerror = () => reject(request.error);
+
+        request.onsuccess = (event) => {
+            const cursor = event.target.result;
+
+            if (!cursor) {
+                resolve(true);
+                return;
+            }
+
+            const value = cursor.value;
+
+            // On cible uniquement les entrées de l'ancien username
+            if (value.username === oldUsername) {
+
+                const updatedValue = {
+                    ...value,
+                    username: newUsername
+                };
+
+                // suppression ancienne entrée
+                cursor.delete();
+
+                // réinsertion avec nouveau username
+                store.put(updatedValue);
+            }
+
+            cursor.continue();
+        };
+    });
+}
+
 // ================================================ FileSystem Storage =============================================== //
 
 export function downloadEncryptedKeyFile(username, encryptedECDSAKey, encryptedECDHKey) {

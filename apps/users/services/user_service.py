@@ -66,7 +66,8 @@ class UserService:
         if user is not None and user:
             user.username = username
             user.email = email 
-            user.set_password(password)
+            if password is not None:
+                user.set_password(password)
             user.save()
             return user
         return None

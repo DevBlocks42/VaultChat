@@ -16,6 +16,37 @@
             {{ form.non_field_errors }}
         </div>
     {% endif %}
+    <div class="row justify-content-center text-center g-3">
+
+        <div class="col-10 col-sm-6 col-md-4">
+            <a href="{% url 'chats-index' %}" class="text-decoration-none">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="fs-1">💬</div>
+                        <h5 class="card-title mt-2">Discussions</h5>
+                        <p class="card-text small text-muted">
+                            Accéder à vos conversations
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-10 col-sm-6 col-md-4">
+            <a href="{% url 'users-settings' %}" class="text-decoration-none">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="fs-1">⚙️</div>
+                        <h5 class="card-title mt-2">Paramètres</h5>
+                        <p class="card-text small text-muted">
+                            Gérer votre compte
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+    </div>
 </div>
 {% endblock %}
 

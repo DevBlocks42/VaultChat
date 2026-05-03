@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block css %} 
+    <link href="{% static 'css/non_form_errors.css'%}" rel="stylesheet">
+    <link href="{% static 'css/form_errors.css'%}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    {% include 'components/messages.html' %}
+    {% if form.non_field_errors %}
+        <div class="" role="alert">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <form class='form' id="settings_form" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="d-grid mt-3">
+                        <button id="submit_button" type="submit" class="btn btn-dark">
+                            Valider
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        window.NEW_USERNAME = "{{ new_username|default:'' }}";
+        window.OLD_USERNAME = "{{ old_username|default:'' }}";
+    </script>
+    <script type="module" src="{% static 'js/user/update.js' %}"></script>
+{% endblock %}
+
