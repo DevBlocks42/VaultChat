@@ -159,6 +159,16 @@ A ouvre la discussion D :
 
 ![Connexion auxilliaire](screens/aux_auth.png)
 
+
+<small>Modification des informations personnelles (authentification locale)</small>
+
+![Modification des infos personnelles (local auth)](screens/settings_local.png)
+
+<small>Modification des informations personnelles (authentification auxiliaire)</small>
+
+![Modification des infos personnelles (local auth)](screens/settings_auxiliary.png)
+
+
 <small>Index des discussions</small>
 
 ![Discussions](screens/chats-index.png)

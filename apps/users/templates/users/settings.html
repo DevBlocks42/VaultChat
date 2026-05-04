@@ -23,12 +23,6 @@
                     {% csrf_token %}
                     {{ form.as_p }}
                     <div class="d-grid mt-3">
-                        {% if auth_type == 'AUXILIARY_AUTH' %}
-                            <label class='' for="id_passphrase">
-                                Fichier d'authentification * :
-                            </label>
-                            <input required class='form-control mt-2' type="file" id="id_auth_file" autocomplete="off">
-                        {% endif %}
                         <button id="submit_button" type="submit" class="btn btn-dark mt-3">
                             Valider
                         </button>

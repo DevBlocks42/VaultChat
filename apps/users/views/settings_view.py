@@ -31,7 +31,7 @@ def view(request):
                         messages.error(request, error)
                     return redirect("users-settings")
                 newUser = UserService.update_user(user.id, form_data.get('username'), form_data.get('email'), form_data.get('password1'))
-                update_session_auth_hash(request, user)
+                update_session_auth_hash(request, newUser)
             else:
                 newUser = UserService.update_user(user.id, form_data.get('username'), form_data.get('email'), None)
             if newUser is not None:
