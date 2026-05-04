@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let inputCreated = false;
     usernameField.addEventListener('change', async (e) => {
         hasUsernameChanged = true;
-        if(inputCreated == false) {
+        if(inputCreated == false && authType == "AUXILIARY_AUTH") {
             const fileInput = createFileInput(submitButton);
             fileInput.setAttribute("required", "");
             fileInput.setAttribute("id", "id_auth_file");
