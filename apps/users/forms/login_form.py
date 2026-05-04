@@ -16,4 +16,5 @@ class LoginForm(forms.Form):
         }
     )
     signature = forms.CharField(widget=forms.HiddenInput(), error_messages={'required': "La signature du nonce est requise."})
+    auth_type = forms.CharField(widget=forms.HiddenInput())
     
