@@ -166,7 +166,7 @@ A ouvre la discussion D :
 
 <small>Modification des informations personnelles (authentification auxiliaire)</small>
 
-![Modification des infos personnelles (local auth)](screens/settings_auxiliary.png)
+![Modification des infos personnelles (aux auth)](screens/settings_auxiliary.png)
 
 
 <small>Index des discussions</small>

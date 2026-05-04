@@ -11,47 +11,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     const usernameField = document.getElementById("id_username");
     const form = document.getElementById("settings_form");
     let hasUsernameChanged = false;
+    let inputCreated = false;
     usernameField.addEventListener('change', async (e) => {
         hasUsernameChanged = true;
-        const fileInput = createFileInput(submitButton);
-        fileInput.setAttribute("required", "");
-        fileInput.setAttribute("id", "id_auth_file");
-        fileInput.setAttribute("class", "form-control");
-        const lbl = document.createElement("label");
-        lbl.textContent = "Fichier d'authentification * :";
-        lbl.setAttribute("for", "id_auth_file");
-        fileInput.parentElement.insertBefore(lbl, fileInput);
-        if(authType == "AUXILIARY_AUTH") {
-            fileInput.addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const text = await file.text();
-                sessionStorage.setItem("recovery_file", text);
-                console.log(text);
-            });
+        if(inputCreated == false) {
+            const fileInput = createFileInput(submitButton);
+            fileInput.setAttribute("required", "");
+            fileInput.setAttribute("id", "id_auth_file");
+            fileInput.setAttribute("class", "form-control");
+            const lbl = document.createElement("label");
+            lbl.textContent = "Fichier d'authentification * :";
+            lbl.setAttribute("for", "id_auth_file");
+            inputCreated = true;
+            fileInput.parentElement.insertBefore(lbl, fileInput);
+            if(authType == "AUXILIARY_AUTH") {
+                fileInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const text = await file.text();
+                    sessionStorage.setItem("recovery_file", text);
+                    console.log(text);
+                });
+            }
         }
     });
-    /*if(authType == "AUXILIARY_AUTH" && hasUsernameChanged) {
-        const fileInput = createFileInput(submitButton);
-        fileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const text = await file.text();
-            sessionStorage.setItem("recovery_file", text);
-            console.log(text);
-        });
-    }*/
-    ////////////
-    /*const fileInput = document.getElementById("id_auth_file");
-
-    fileInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const text = await file.text();
-        sessionStorage.setItem("recovery_file", text);
-        console.log(text);
-    });*/
-    /////
     console.log("AUTH_TYPE : " + authType);
     console.log("OLD : " + oldUsername);
     console.log("NEW : " + updatedUsername);
