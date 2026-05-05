@@ -38,6 +38,7 @@ async function pollMessages(config, workerPort, chatId, lastMessageId) {
     const ciphersToDecrypt = await fetchMessageCiphers(chatId, lastMessageId);
     const cipherObjects = ciphersToDecrypt.ciphertexts;
     if(cipherObjects.length != 0) {
+        console.log(ciphersToDecrypt);
         currentLastMessageId = cipherObjects[cipherObjects.length - 1].message_id;
         if(lastMessageId != currentLastMessageId) { // Présence de nouveaux messages
             // Decryption worker
