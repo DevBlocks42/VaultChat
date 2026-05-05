@@ -44,7 +44,6 @@ class RegisterForm(UserCreationForm):
         error_messages={
             'required': "La clef publique est requise."
         }
-        #TODO validators
     )
 
     class Meta:
