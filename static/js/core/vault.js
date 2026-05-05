@@ -1,6 +1,8 @@
-import { decryptCipherForRecipient } from "./encryption.js";
+import { decryptCipherForRecipient, signCanonicalMessage } from "./encryption.js";
+import { arrayBufferToBase64, serializeObject } from "./utils.js";
 
 let privateKey = null;
+let identityPrivateKey = null;
 
 const ports = new Set();
 
@@ -23,7 +25,8 @@ onconnect = function (e) {
         const { type, payload } = event.data;
         switch (type) {
             case "SET_PRIVATE_KEY":
-                privateKey = payload;
+                privateKey = payload.ECDH;
+                identityPrivateKey = payload.ECDSA;
                 port.postMessage({ type: "ACK" });
                 break;
 
@@ -40,6 +43,22 @@ onconnect = function (e) {
                     const { config, cipherObjects } = payload;
                     const result = await decryptCipherForRecipient(config, cipherObjects, privateKey);
                     port.postMessage({ type: "DECRYPT_RESULT", result:result });
+                } catch (err) {
+                    port.postMessage({ type: "ERROR", error: serializeError(err) });
+                }
+                break;
+
+            case "SIGN_MESSAGE":
+                try {
+                    const { config, message } = payload;
+                    const canonicalMessage = serializeObject(message);
+                    const signature = await signCanonicalMessage(canonicalMessage, identityPrivateKey, config);
+                
+                    port.postMessage({
+                        type: "SIGN_RESULT",
+                        signature: signature
+                    });
+                
                 } catch (err) {
                     port.postMessage({ type: "ERROR", error: serializeError(err) });
                 }

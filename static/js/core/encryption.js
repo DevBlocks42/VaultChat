@@ -259,7 +259,6 @@ export async function decryptCipherForRecipient(config, cipherObjects, recipient
         //salt
         const recipientPublicKeyB64SPKI = cipherObj.recipient_public_key;
         const recipientPublicKey = await importRecipientPublicKey(recipientPublicKeyB64SPKI, config);
-        console.log(recipientPublicKeyB64SPKI);
         const salt = await generateEncryptionSalt(epk, recipientPublicKey);
         const aes = await deriveAESKeyFromSecret(secret, salt, config);
         const plaintext = await decryptAES(aes, nonce, ciphertext, config);
@@ -269,18 +268,19 @@ export async function decryptCipherForRecipient(config, cipherObjects, recipient
 
 }
 
-export async function signECDHKey(ecdsaKeyPair, ecdhPublicKey) {
-    const ecdhRaw = await crypto.subtle.exportKey("raw", ecdhPublicKey);
+export async function signCanonicalMessage(payload, senderECDSAPrivateKey, config) {
     const signature = await crypto.subtle.sign(
         {
-            name: "ECDSA",
-            hash: "SHA-256",
+          name: config.asymmetric.algorithm,
+          hash: config.asymmetric.hash,
         },
-        ecdsaKeyPair.privateKey,
-        ecdhRaw
+        senderECDSAPrivateKey,
+        payload
     );
     return arrayBufferToBase64(signature);
 }
+
+
 
 export async function importRecipientPublicKey(base64Spki, config) {
     const spkiBuffer = base64ToArrayBufferSafe(base64Spki);
@@ -324,6 +324,37 @@ export async function importPrivateKey(config, base64PrivateKey) {
         {
             name: config.asymmetric.algorithm2,
             namedCurve: config.asymmetric.curve
+        },
+        true,
+        ["deriveBits"]
+    );
+    return key;
+}
+export async function importPrivateKeyECDSA(base64PrivateKey) {
+    const binary = Uint8Array.from(atob(base64PrivateKey), c => c.charCodeAt(0));
+
+    const key = await crypto.subtle.importKey(
+        "pkcs8",
+        binary.buffer,
+        {
+            name: "ECDSA",
+            namedCurve: "P-256"
+        },
+        true,
+        ["sign"]
+    );
+    return key;
+}
+
+export async function importPrivateKeyECDH(base64PrivateKey) {
+    const binary = Uint8Array.from(atob(base64PrivateKey), c => c.charCodeAt(0));
+
+    const key = await crypto.subtle.importKey(
+        "pkcs8",
+        binary.buffer,
+        {
+            name: "ECDH",
+            namedCurve: "P-256"
         },
         true,
         ["deriveBits"]
