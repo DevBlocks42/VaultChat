@@ -269,6 +269,19 @@ export async function decryptCipherForRecipient(config, cipherObjects, recipient
 
 }
 
+export async function signECDHKey(ecdsaKeyPair, ecdhPublicKey) {
+    const ecdhRaw = await crypto.subtle.exportKey("raw", ecdhPublicKey);
+    const signature = await crypto.subtle.sign(
+        {
+            name: "ECDSA",
+            hash: "SHA-256",
+        },
+        ecdsaKeyPair.privateKey,
+        ecdhRaw
+    );
+    return arrayBufferToBase64(signature);
+}
+
 export async function importRecipientPublicKey(base64Spki, config) {
     const spkiBuffer = base64ToArrayBufferSafe(base64Spki);
 
