@@ -18,7 +18,7 @@ class ChatMessageAPI(APIView):
         chat = serializer.validated_data['chat']
         if ChatService.allowed_to_participate(user, chat):
             ciphertexts = serializer.validated_data['ciphertexts']
-            signature = serializer.validated_data['ciphertexts']
+            signature = serializer.validated_data['signature']
             try:
                 with transaction.atomic():
                     message = ChatService.store_chat_message(chat, user, signature)

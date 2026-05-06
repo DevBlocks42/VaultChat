@@ -38,9 +38,9 @@ async function pollMessages(config, workerPort, chatId, lastMessageId) {
     const ciphersToDecrypt = await fetchMessageCiphers(chatId, lastMessageId);
     const cipherObjects = ciphersToDecrypt.ciphertexts;
     if(cipherObjects.length != 0) {
-        //console.log(cipherObjects);
         currentLastMessageId = cipherObjects[cipherObjects.length - 1].message_id;
         if(lastMessageId != currentLastMessageId) { // Présence de nouveaux messages
+            
             // Decryption worker
             
             workerPort.postMessage({
@@ -73,7 +73,6 @@ function workerSignMessage(config, port, message) {
         };
 
         port.addEventListener("message", handler);
-
         port.postMessage({
             type: "SIGN_MESSAGE",
             payload: {
@@ -141,7 +140,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             payload.ciphertexts.push(messageCipher);
         }
         const userIdentity = await fetchUserIdentity();
-        console.log("My Identity : " + userIdentity.signing_public_key);
         const messageSignaturePayload = {
             chat_id: Number(chatId),
             sender_id: userIdentity.id,
@@ -149,7 +147,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         const signature = await workerSignMessage(config, port, messageSignaturePayload);
         payload.signature = signature;
-        console.log("PAYLOAD MESSAGE : " + JSON.stringify(payload));
         const res = await sendMessageCiphers(payload);
         plaintextField.value = ""; 
 

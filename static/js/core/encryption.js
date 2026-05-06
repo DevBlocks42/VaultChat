@@ -1,4 +1,4 @@
-import { arrayBufferToBase64, base64ToArrayBuffer, base64ToArrayBufferSafe, concatUint8Arrays } from "../core/utils.js"
+import { arrayBufferToBase64, base64ToArrayBuffer, base64ToArrayBufferSafe, concatUint8Arrays, serializeObject } from "../core/utils.js"
 
 export async function generateECDSAKeyPair(config) {
     const keyPair = await crypto.subtle.generateKey(
@@ -252,6 +252,16 @@ export async function encryptMessageForRecipient(keyMaterial, plaintext, salt, c
 export async function decryptCipherForRecipient(config, cipherObjects, recipientSecretKey) {
     let plaintexts = [];
     for(const cipherObj of cipherObjects) {
+        const payload = {
+            chat_id: Number(cipherObj.chat_id),
+            sender_id: cipherObj.sender_identity,
+            sender_signing_key: cipherObj.sender_identity_key
+
+        }
+        const signature = cipherObj.message_signature;
+        const verified = await verifyCanonicalMessage(payload, signature, config);
+        console.log(verified);
+
         const epk = await importRecipientPublicKey(cipherObj.ephemeral_public_key, config);
         const nonce = base64ToArrayBuffer(cipherObj.nonce);
         const ciphertext = base64ToArrayBufferSafe(cipherObj.ciphertext);
@@ -269,6 +279,8 @@ export async function decryptCipherForRecipient(config, cipherObjects, recipient
 }
 
 export async function signCanonicalMessage(payload, senderECDSAPrivateKey, config) {
+    console.log("==========SIGN FOLLOWING BINARY PAYLOAD==========");
+    console.log(payload);
     const signature = await crypto.subtle.sign(
         {
           name: config.asymmetric.algorithm,
@@ -281,6 +293,38 @@ export async function signCanonicalMessage(payload, senderECDSAPrivateKey, confi
 }
 
 
+export async function verifyCanonicalMessage(payload, signature, config) {
+
+    const signedPayload = {
+        chat_id: payload.chat_id,
+        sender_id: Number(payload.sender_id),
+        sender_signing_key: payload.sender_signing_key
+    };
+    //Conversion
+    //const rawSig = base64ToArrayBufferSafe(signature);
+    //const derSig = rawToDer(new Uint8Array(rawSig));
+    
+    const canonicalPayload = serializeObject(signedPayload); 
+    const sender_signing_key = payload.sender_signing_key;
+    const publicKey = await importSigningPublicKey(sender_signing_key, config);
+    const signatureBuffer = base64ToArrayBuffer(signature);
+    console.log("==========VERIFY FOLLOWING BINARY PAYLOAD===========");
+    console.log(canonicalPayload);
+    //const data = new TextEncoder().encode(canonicalPayload);
+
+    const isValid = await crypto.subtle.verify(
+        {
+            name: config.asymmetric.algorithm,
+            hash: { name: config.asymmetric.hash }
+        },
+        publicKey,
+        signatureBuffer,
+        canonicalPayload
+    );
+
+
+    return isValid;
+}
 
 export async function importRecipientPublicKey(base64Spki, config) {
     const spkiBuffer = base64ToArrayBufferSafe(base64Spki);
@@ -294,6 +338,21 @@ export async function importRecipientPublicKey(base64Spki, config) {
         },
         true,//chgt
         []
+    );
+}
+
+async function importSigningPublicKey(base64Spki, config) {
+    const spkiBuffer = base64ToArrayBufferSafe(base64Spki);
+
+    return await crypto.subtle.importKey(
+        "spki",
+        spkiBuffer,
+        {
+            name: config.asymmetric.algorithm,
+            namedCurve: config.asymmetric.curve
+        },
+        true,//chgt
+        ["verify"]
     );
 }
 
