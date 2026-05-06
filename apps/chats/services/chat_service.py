@@ -87,8 +87,8 @@ class ChatService():
         ).values_list("id", flat=True)
 
     @staticmethod
-    def store_chat_message(chat : Chat, sender : User):
-        message = Message.objects.create(sender=sender, chat=chat)
+    def store_chat_message(chat : Chat, sender : User, signature : str):
+        message = Message.objects.create(sender=sender.identity, chat=chat, signature=signature)
         return message
 
     @staticmethod

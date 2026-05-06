@@ -1,4 +1,4 @@
-import { arrayBufferToBase64, base64ToArrayBuffer, base64ToArrayBufferSafe, concatUint8Arrays } from "../core/utils.js"
+import { arrayBufferToBase64, base64ToArrayBuffer, base64ToArrayBufferSafe, concatUint8Arrays, serializeObject } from "../core/utils.js"
 
 export async function generateECDSAKeyPair(config) {
     const keyPair = await crypto.subtle.generateKey(
@@ -252,6 +252,16 @@ export async function encryptMessageForRecipient(keyMaterial, plaintext, salt, c
 export async function decryptCipherForRecipient(config, cipherObjects, recipientSecretKey) {
     let plaintexts = [];
     for(const cipherObj of cipherObjects) {
+        const payload = {
+            chat_id: Number(cipherObj.chat_id),
+            sender_id: cipherObj.sender_identity,
+            sender_signing_key: cipherObj.sender_identity_key
+
+        }
+        const signature = cipherObj.message_signature;
+        const verified = await verifyCanonicalMessage(payload, signature, config);
+        console.log(verified);
+
         const epk = await importRecipientPublicKey(cipherObj.ephemeral_public_key, config);
         const nonce = base64ToArrayBuffer(cipherObj.nonce);
         const ciphertext = base64ToArrayBufferSafe(cipherObj.ciphertext);
@@ -259,7 +269,6 @@ export async function decryptCipherForRecipient(config, cipherObjects, recipient
         //salt
         const recipientPublicKeyB64SPKI = cipherObj.recipient_public_key;
         const recipientPublicKey = await importRecipientPublicKey(recipientPublicKeyB64SPKI, config);
-        console.log(recipientPublicKeyB64SPKI);
         const salt = await generateEncryptionSalt(epk, recipientPublicKey);
         const aes = await deriveAESKeyFromSecret(secret, salt, config);
         const plaintext = await decryptAES(aes, nonce, ciphertext, config);
@@ -269,17 +278,52 @@ export async function decryptCipherForRecipient(config, cipherObjects, recipient
 
 }
 
-export async function signECDHKey(ecdsaKeyPair, ecdhPublicKey) {
-    const ecdhRaw = await crypto.subtle.exportKey("raw", ecdhPublicKey);
+export async function signCanonicalMessage(payload, senderECDSAPrivateKey, config) {
+    console.log("==========SIGN FOLLOWING BINARY PAYLOAD==========");
+    console.log(payload);
     const signature = await crypto.subtle.sign(
         {
-            name: "ECDSA",
-            hash: "SHA-256",
+          name: config.asymmetric.algorithm,
+          hash: config.asymmetric.hash,
         },
-        ecdsaKeyPair.privateKey,
-        ecdhRaw
+        senderECDSAPrivateKey,
+        payload
     );
     return arrayBufferToBase64(signature);
+}
+
+
+export async function verifyCanonicalMessage(payload, signature, config) {
+
+    const signedPayload = {
+        chat_id: payload.chat_id,
+        sender_id: Number(payload.sender_id),
+        sender_signing_key: payload.sender_signing_key
+    };
+    //Conversion
+    //const rawSig = base64ToArrayBufferSafe(signature);
+    //const derSig = rawToDer(new Uint8Array(rawSig));
+    
+    const canonicalPayload = serializeObject(signedPayload); 
+    const sender_signing_key = payload.sender_signing_key;
+    const publicKey = await importSigningPublicKey(sender_signing_key, config);
+    const signatureBuffer = base64ToArrayBuffer(signature);
+    console.log("==========VERIFY FOLLOWING BINARY PAYLOAD===========");
+    console.log(canonicalPayload);
+    //const data = new TextEncoder().encode(canonicalPayload);
+
+    const isValid = await crypto.subtle.verify(
+        {
+            name: config.asymmetric.algorithm,
+            hash: { name: config.asymmetric.hash }
+        },
+        publicKey,
+        signatureBuffer,
+        canonicalPayload
+    );
+
+
+    return isValid;
 }
 
 export async function importRecipientPublicKey(base64Spki, config) {
@@ -294,6 +338,21 @@ export async function importRecipientPublicKey(base64Spki, config) {
         },
         true,//chgt
         []
+    );
+}
+
+async function importSigningPublicKey(base64Spki, config) {
+    const spkiBuffer = base64ToArrayBufferSafe(base64Spki);
+
+    return await crypto.subtle.importKey(
+        "spki",
+        spkiBuffer,
+        {
+            name: config.asymmetric.algorithm,
+            namedCurve: config.asymmetric.curve
+        },
+        true,//chgt
+        ["verify"]
     );
 }
 
@@ -324,6 +383,37 @@ export async function importPrivateKey(config, base64PrivateKey) {
         {
             name: config.asymmetric.algorithm2,
             namedCurve: config.asymmetric.curve
+        },
+        true,
+        ["deriveBits"]
+    );
+    return key;
+}
+export async function importPrivateKeyECDSA(base64PrivateKey) {
+    const binary = Uint8Array.from(atob(base64PrivateKey), c => c.charCodeAt(0));
+
+    const key = await crypto.subtle.importKey(
+        "pkcs8",
+        binary.buffer,
+        {
+            name: "ECDSA",
+            namedCurve: "P-256"
+        },
+        true,
+        ["sign"]
+    );
+    return key;
+}
+
+export async function importPrivateKeyECDH(base64PrivateKey) {
+    const binary = Uint8Array.from(atob(base64PrivateKey), c => c.charCodeAt(0));
+
+    const key = await crypto.subtle.importKey(
+        "pkcs8",
+        binary.buffer,
+        {
+            name: "ECDH",
+            namedCurve: "P-256"
         },
         true,
         ["deriveBits"]

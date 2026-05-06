@@ -53,6 +53,14 @@ export function createFileInput(submitField) {
     return input;
 }
 
+export function serializeObject(payload) {
+    const encoder = new TextEncoder();
+    const canonicalPayload = encoder.encode(
+        JSON.stringify(payload)
+    );
+    return canonicalPayload;
+}
+
 export function hideInput(input) {
     input.remove();
 }
