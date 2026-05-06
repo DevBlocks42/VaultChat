@@ -52,13 +52,12 @@ Le projet repose sur une conception cryptographique moderne :
 - Envoi de messages chiffrés non signés (AES-GCM).
 - Récéption des messages chiffrés, déchiffrement. 
 - Modification des informations personnelles (pseudonyme, adresse email, mot de passe) en synchronisation avec le fichier de restauration.
+- Mécanisme de signature/vérification des messages.
 
 ---
 
 # Fonctionnalités en attente
 
-- Mécanisme de signature/vérification des messages.
-- Pagination des messages (+ efficace pour les discussions verbeuses).
 - Intégrer l'export des clefs permanentes dans un fichier chiffré, sur demande de l'utilisateur (déjà implémenté à l'inscription).
 
 
