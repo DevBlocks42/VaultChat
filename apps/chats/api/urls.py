@@ -1,9 +1,10 @@
 from django.urls import path
 from rest_framework_simplejwt.views import (TokenObtainPairView, TokenRefreshView)
-from .views import ChatMessageAPI, ChatIdentityAPI, ChatRetrieveMessagesAPI
+from .views import ChatMessageAPI, ChatIdentityAPI, ChatRetrieveMessagesAPI, ChatUserIdentityAPI
 
 urlpatterns = [
     path('send', ChatMessageAPI.as_view()),
     path('retrieve', ChatRetrieveMessagesAPI.as_view()),
-    path('identities', ChatIdentityAPI.as_view())
+    path('identities', ChatIdentityAPI.as_view()),
+    path('identity', ChatUserIdentityAPI.as_view())
 ]

@@ -18,9 +18,10 @@ class ChatMessageAPI(APIView):
         chat = serializer.validated_data['chat']
         if ChatService.allowed_to_participate(user, chat):
             ciphertexts = serializer.validated_data['ciphertexts']
+            signature = serializer.validated_data['signature']
             try:
                 with transaction.atomic():
-                    message = ChatService.store_chat_message(chat, user)
+                    message = ChatService.store_chat_message(chat, user, signature)
                     if not message:
                         raise Exception("Ressource non créée")
                     chat_identities = ChatService.get_allowed_identities(chat)
@@ -96,3 +97,13 @@ class ChatIdentityAPI(APIView):
         chat_identities = ChatService.get_chat_identities(chat)
         serializer = ChatIdentitySerializer(chat_identities, many=True)
         return Response({'identities': serializer.data}, status=status.HTTP_200_OK)
+
+
+
+class ChatUserIdentityAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        serializer = ChatIdentitySerializer(user.identity)
+        return Response({'identity': serializer.data}, status=status.HTTP_200_OK)

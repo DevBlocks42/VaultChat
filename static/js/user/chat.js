@@ -1,7 +1,7 @@
-import { fetchRecipientsIdentities, sendMessageCiphers, fetchMessageCiphers } from "../core/transport.js";
+import { fetchUserIdentity, fetchRecipientsIdentities, sendMessageCiphers, fetchMessageCiphers } from "../core/transport.js";
 import { getBrowserPrivateKey } from "../core/storage.js";
-import { generateEncryptionSalt, importPrivateKey, computeSharedSecret, deriveSharedSecret, encryptMessageForRecipient, decryptCipherForRecipient, decryptECDHPrivateKey, importRecipientPublicKey, generateECDHKeyPair, exportPublicKey } from "../core/encryption.js";
-import { loadConfig, sleep } from "../core/utils.js";
+import { importPrivateKeyECDSA, generateEncryptionSalt, importPrivateKey, computeSharedSecret, deriveSharedSecret, encryptMessageForRecipient, importRecipientPublicKey, generateECDHKeyPair, exportPublicKey } from "../core/encryption.js";
+import { loadConfig, sleep, serializeObject } from "../core/utils.js";
 
 let pollDelay = 2500; 
 const MAX_DELAY = 10000; 
@@ -12,7 +12,7 @@ async function pollLoop(config, workerPort, chatId, messageOutputArea) {
     let lastMessageId = 0;
     workerPort.addEventListener('message', (event) => {  
         const { type, result, error } = event.data || {};  
-        if (type === 'DECRYPT_RESULT') {    
+        if (type === 'DECRYPT_RESULT') {  
             for(const message of result) {
                 const date = new Date(message[2]);
                 const formattedDate = new Intl.DateTimeFormat(navigator.language, {
@@ -38,9 +38,9 @@ async function pollMessages(config, workerPort, chatId, lastMessageId) {
     const ciphersToDecrypt = await fetchMessageCiphers(chatId, lastMessageId);
     const cipherObjects = ciphersToDecrypt.ciphertexts;
     if(cipherObjects.length != 0) {
-        console.log(ciphersToDecrypt);
         currentLastMessageId = cipherObjects[cipherObjects.length - 1].message_id;
         if(lastMessageId != currentLastMessageId) { // Présence de nouveaux messages
+            
             // Decryption worker
             
             workerPort.postMessage({
@@ -56,6 +56,33 @@ async function pollMessages(config, workerPort, chatId, lastMessageId) {
     return currentLastMessageId;
 }
 
+function workerSignMessage(config, port, message) {
+    return new Promise((resolve, reject) => {
+
+        const handler = (e) => {
+            if (e.data.type === "SIGN_RESULT") {
+                console.log("SIGN_RESULT : " + e.data.signature);
+                port.removeEventListener("message", handler);
+                resolve(e.data.signature);
+            }
+            if (e.data.type === "ERROR") {
+                console.log("SIGN_ERROR : " + e.data.error);
+                port.removeEventListener("message", handler);
+                reject(e.data.error);
+            }
+        };
+
+        port.addEventListener("message", handler);
+        port.postMessage({
+            type: "SIGN_MESSAGE",
+            payload: {
+                config: config,
+                message: message
+            }
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const config = await loadConfig();
     const params = new URLSearchParams(window.location.search);
@@ -63,10 +90,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const plaintextField = document.getElementById("id_message_field");
     const sendButton = document.getElementById("id_send_button");
     const messageOutputArea = document.getElementById("id_message_output");
-    //
-    //const ids = await fetchRecipientsIdentities(chatId);
-    //console.log(ids);
-    //
     messageOutputArea.value += "\n";
     //vault worker
     const worker = new SharedWorker("/static/js/core/vault.js", {
@@ -76,21 +99,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     port.start();
     if(isBrave || isChrome) {
         var key = sessionStorage.getItem("vaultchat_key");
-        const cryptoKeyObject = await importPrivateKey(config, key); 
+        var identity_key = sessionStorage.getItem("vaultchat_identity_key");
+        const cryptoKeyObjectECDH = await importPrivateKey(config, key); 
+        const cryptoKeyObjectECDSA = await importPrivateKeyECDSA(identity_key);
         console.log(key);
         port.postMessage({
             type: "SET_PRIVATE_KEY",
-            payload: cryptoKeyObject
+            payload: {
+                ECDH: cryptoKeyObjectECDH,
+                ECDSA: cryptoKeyObjectECDSA
+            }
         });
     }
     pollLoop(config, port, chatId, messageOutputArea);
+
+    
     sendButton.addEventListener('click', async (e) => {
         const identities = await fetchRecipientsIdentities(chatId);
-        //console.log(identities);
+        console.log(identities);
         const plaintext = plaintextField.value;
         var payload = {
             chat: Number(chatId),
-            ciphertexts: []
+            ciphertexts: [],
+            signature: ""
         };
         const ephemeralECDHPair = await generateECDHKeyPair(config);
         for(const identity of identities) {
@@ -108,6 +139,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             payload.ciphertexts.push(messageCipher);
         }
+        const userIdentity = await fetchUserIdentity();
+        const messageSignaturePayload = {
+            chat_id: Number(chatId),
+            sender_id: userIdentity.id,
+            sender_signing_key: userIdentity.signing_public_key
+        };
+        const signature = await workerSignMessage(config, port, messageSignaturePayload);
+        payload.signature = signature;
         const res = await sendMessageCiphers(payload);
         plaintextField.value = ""; 
 

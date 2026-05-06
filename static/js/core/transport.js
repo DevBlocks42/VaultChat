@@ -27,6 +27,18 @@ export async function fetchRecipientsIdentities(chatID) {
     return data.identities;
 }
 
+export async function fetchUserIdentity() {
+    const response = await fetch("/api/chats/identity", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        }
+    });
+    const data = await response.json();
+    return data.identity;
+}
+
 export async function sendMessageCiphers(payload) {
     const response = await fetch("/api/chats/send", {
         method: "POST",

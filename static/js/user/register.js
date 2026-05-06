@@ -1,4 +1,4 @@
-import { signECDHKey, generateECDHKeyPair, generateECDSAKeyPair, exportPublicKey, exportPrivateKey, encryptPrivateKey } from "../core/encryption.js";
+import { generateECDHKeyPair, generateECDSAKeyPair, exportPublicKey, exportPrivateKey, encryptPrivateKey } from "../core/encryption.js";
 import { loadConfig } from "../core/utils.js";
 import { saveBrowserPrivateKey, downloadEncryptedKeyFile } from "../core/storage.js";
 

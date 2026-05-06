@@ -1,13 +1,13 @@
 import { getBrowserPrivateKey, getFileSystemPrivateKey } from "../core/storage.js";
 import { loadConfig, createFileInput, hideInput, arrayBufferToBase64 } from "../core/utils.js";
-import { decryptECDSAPrivateKey, decryptECDHPrivateKey, signNonce } from "../core/encryption.js"
+import { decryptECDSAPrivateKey, decryptECDHPrivateKey, signNonce, exportPrivateKey } from "../core/encryption.js"
 import { fetchNonce } from "../core/transport.js"; 
 
 
 
-async function setPrivateKey(port, key) {
-    return new Promise((resolve) => {
-        const handler = (e) => {
+async function setPrivateKey(port, key, identity_key) {
+    return new Promise(async (resolve) => {
+        const handler = async (e) => {
             if (e.data.type === "ACK") {
                 port.removeEventListener("message", handler);
                 resolve();
@@ -18,17 +18,25 @@ async function setPrivateKey(port, key) {
 
         port.postMessage({
             type: "SET_PRIVATE_KEY",
-            payload: key
+            payload: {
+                ECDH: key,
+                ECDSA: identity_key
+            }
         });
     });
 }
 
-async function setPrivateKeyNonFirefox(key) {
+async function setPrivateKeyNonFirefox(key, identity_key) {
     const exported = await crypto.subtle.exportKey("pkcs8", key);
     const base64Key = btoa(
         String.fromCharCode(...new Uint8Array(exported))
     );
+    const exportedID = await crypto.subtle.exportKey("pkcs8", identity_key);
+    const base64KeyID = btoa(
+        String.fromCharCode(...new Uint8Array(exportedID))
+    );
     sessionStorage.setItem("vaultchat_key", base64Key);
+    sessionStorage.setItem("vaultchat_identity_key", base64KeyID);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -71,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             if(auxAuthState) {
                 privateKeyMaterials = await getFileSystemPrivateKey(fileInput.files[0]);
-                privateKeyMaterialsECDH = privateKeyMaterials.ECDH; // WARNING peut-être pas implémenté CORRECTEMENT ? 
+                privateKeyMaterialsECDH = privateKeyMaterials.ECDH;
                 privateKeyMaterials = privateKeyMaterials.ECDSA;
                 authTypeField.value="AUXILIARY_AUTH";
 
@@ -87,9 +95,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const signatureB64 = await signNonce(pkcs8PrivateKey, nonce, config);
                 signatureField.value = signatureB64;
                 if(isBrave || isChrome) {
-                    await setPrivateKeyNonFirefox(pkcs8ECDHPrivateKey);
+                    await setPrivateKeyNonFirefox(pkcs8ECDHPrivateKey, pkcs8PrivateKey);
                 } else {
-                    await setPrivateKey(port, pkcs8ECDHPrivateKey);
+                    await setPrivateKey(port, pkcs8ECDHPrivateKey, pkcs8PrivateKey);
                 }
                 form.submit();
             } catch(err) {

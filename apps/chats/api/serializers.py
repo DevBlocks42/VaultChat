@@ -14,8 +14,12 @@ class MessageCipherSerializer(serializers.Serializer):
 class MessageCipherRetrieveSerializer(serializers.ModelSerializer):
     message_id = serializers.IntegerField(source="message.id")
     created_at = serializers.DateTimeField(source="message.created_at")
-    sender_username = serializers.CharField(source="message.sender.username")
+    sender_username = serializers.CharField(source="message.sender.user.username")
+    sender_identity = serializers.CharField(source="message.sender.id")
+    sender_identity_key = serializers.CharField(source="message.sender.signing_public_key")
     recipient_public_key = serializers.CharField(source="identity.key_agreement_public_key")
+    message_signature = serializers.CharField(source="message.signature")
+    chat_id = serializers.CharField(source="message.chat.id")
     class Meta:
         model = MessageCipher
         fields = [
@@ -24,6 +28,10 @@ class MessageCipherRetrieveSerializer(serializers.ModelSerializer):
             "ephemeral_public_key",
             "nonce",
             "created_at",
+            "message_signature",
+            "chat_id",
+            "sender_identity",
+            "sender_identity_key",
             "sender_username",
             "recipient_public_key"
         ]   
@@ -32,6 +40,7 @@ class MessageCipherRetrieveSerializer(serializers.ModelSerializer):
 class MessageCreateSerializer(serializers.Serializer):
     chat = serializers.PrimaryKeyRelatedField(queryset=Chat.objects.all())
     ciphertexts = MessageCipherSerializer(many=True)
+    signature = serializers.CharField()
     def validate(self, data):
         chat = data["chat"]
         allowed_identities = ChatService.get_allowed_identities(chat)
